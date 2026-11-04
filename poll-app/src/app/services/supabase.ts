@@ -20,4 +20,20 @@ export class Supabase {
   get client(): SupabaseClient {
     return this.supabase;
   }
+
+  
+  async getSurveys() {
+    const { data, error } = await this.supabase
+      .from('surveys')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading surveys:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
 }
