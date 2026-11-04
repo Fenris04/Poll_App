@@ -36,4 +36,20 @@ export class Supabase {
     return data;
   }
 
+  
+  async getSurveyOptions(surveyId: string) {
+    const { data, error } = await this.supabase
+      .from('survey_options')
+      .select('*')
+      .eq('survey_id', surveyId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error loading survey options:', error);
+      throw error;
+    }
+
+    return data;
+  }
+
 }
