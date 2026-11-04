@@ -8,33 +8,34 @@ import { Supabase } from './services/supabase';
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
+
 export class App {
   protected readonly title = signal('poll-app');
 
-  
+  surveys: any[] = [];
+  surveyOptions: any[] = [];
+
   constructor(private supabaseService: Supabase) {
     this.loadSurveys();
   }
 
-  
   async loadSurveys() {
     try {
-      const surveys = await this.supabaseService.getSurveys();
+      this.surveys = await this.supabaseService.getSurveys();
 
-      console.log('Surveys from Supabase:', surveys);
+      console.log('Surveys from Supabase:', this.surveys);
 
-      if (surveys && surveys.length > 0) {
-        const firstSurvey = surveys[0];
+      if (this.surveys.length > 0) {
+        this.surveyOptions =
+          await this.supabaseService.getSurveyOptions(
+            this.surveys[0].id
+          );
 
-        const options =
-          await this.supabaseService.getSurveyOptions(firstSurvey.id);
-
-        console.log('Survey options:', options);
+        console.log('Survey options:', this.surveyOptions);
       }
     } catch (error) {
       console.error('Failed to load surveys:', error);
     }
   }
-
-
 }
+
