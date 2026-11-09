@@ -1,0 +1,36 @@
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 60px 0;
+
+  &__content {
+    max-width: 520px;
+  }
+
+  h1 {
+    color: #ffb66e;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.1;
+  }
+
+  p {
+    color: #fff;
+    margin: 20px 0;
+  }
+
+  button {
+    background: #ffd0a6;
+    border: 0;
+    border-radius: 6px;
+    padding: 12px 20px;
+    cursor: pointer;
+  }
+
+  &__image {
+    width: 40%;
+    max-width: 350px;
+  }
+}
