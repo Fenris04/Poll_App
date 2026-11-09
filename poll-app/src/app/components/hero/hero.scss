@@ -10,24 +10,37 @@
     max-width: 520px;
   }
 
+  
   h1 {
-    color: #ffb66e;
-    font-size: clamp(36px, 5vw, 56px);
-    line-height: 1.1;
+    font-family: 'Nerko One', cursive;
+    font-weight: 400;
+    font-size: clamp(42px, 5.2vw, 100px);
+    line-height: 0.89;
+    color: var(--primary-orange);
+    margin: 0;
   }
 
   p {
-    color: #fff;
-    margin: 20px 0;
+    font-family: 'Mulish', sans-serif;
+    font-weight: 600;
+    font-size: clamp(16px, 1.25vw, 24px);
+    line-height: 1;
+    color: white;
+    margin: 24px 0;
   }
 
   button {
-    background: #ffd0a6;
-    border: 0;
+    font-family: 'Nokora', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    background-color: var(--secondary-orange);
+    color: var(--primary-purple);
+    border: none;
     border-radius: 6px;
     padding: 12px 20px;
     cursor: pointer;
   }
+
 
   &__image {
     width: 40%;
