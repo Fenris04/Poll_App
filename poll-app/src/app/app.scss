@@ -24,6 +24,40 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
   }
+
+  &__empty {
+    font-family: 'Mulish', sans-serif;
+    font-size: 16px;
+    color: white;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 32px;
+    margin: 56px 0 28px;
+
+    button {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 0 0 10px;
+      color: white;
+      font-family: 'Mulish', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+
+      &:hover {
+        color: var(--primary-orange);
+      }
+
+      &.surveys__tab--active {
+        color: var(--primary-orange);
+        border-bottom-color: var(--primary-orange);
+      }
+    }
+  }
 }
 
 @media (max-width: 900px) {
@@ -35,5 +69,13 @@
 @media (max-width: 600px) {
   .surveys__grid {
     grid-template-columns: 1fr;
+  }
+
+  .surveys__tabs {
+    gap: 20px;
+
+    button {
+      font-size: 18px;
+    }
   }
 }

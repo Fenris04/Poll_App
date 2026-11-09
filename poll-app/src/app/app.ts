@@ -17,6 +17,7 @@ export class App {
 
   surveys: any[] = [];
   surveyOptions: any[] = [];
+  selectedTab: 'active' | 'past' = 'active';
 
   constructor(private supabaseService: Supabase) {
     this.loadSurveys();
@@ -64,4 +65,14 @@ export class App {
     });
   }
 
+  get pastSurveys() {
+    const now = Date.now();
+
+    return this.surveys.filter(survey => {
+      if (!survey.end_date) return false;
+
+      const endDate = new Date(survey.end_date).getTime();
+      return endDate <= now;
+    });
+  }
 }

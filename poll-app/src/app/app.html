@@ -1,21 +1,84 @@
+
 <app-header></app-header>
 
 <app-hero></app-hero>
 
 <main class="poll-app">
   <section class="surveys">
+
     <h2>Your surveys</h2>
 
-    <h3 class="surveys__subtitle">Active surveys</h3>
+    <!-- Ending soon surveys -->
+    <h3 class="surveys__subtitle">
+      Ending soon surveys
+    </h3>
 
-    @if (activeSurveys.length > 0) {
+    @if (endingSoonSurveys.length > 0) {
       <div class="surveys__grid">
-        @for (survey of activeSurveys; track survey.id) {
-          <app-survey-card [survey]="survey"></app-survey-card>
+        @for (survey of endingSoonSurveys; track survey.id) {
+          <app-survey-card
+            [survey]="survey">
+          </app-survey-card>
         }
       </div>
     } @else {
-      <p class="surveys__empty">No active surveys available.</p>
+      <p class="surveys__empty">
+        No surveys ending soon.
+      </p>
     }
+
+    <!-- Active and past survey tabs -->
+    <div class="surveys__tabs">
+      <button
+        type="button"
+        [class.surveys__tab--active]="selectedTab === 'active'"
+        [attr.aria-pressed]="selectedTab === 'active'"
+        (click)="selectedTab = 'active'">
+        Active surveys
+      </button>
+
+      <button
+        type="button"
+        [class.surveys__tab--active]="selectedTab === 'past'"
+        [attr.aria-pressed]="selectedTab === 'past'"
+        (click)="selectedTab = 'past'">
+        Past surveys
+      </button>
+    </div>
+
+    <!-- Active surveys -->
+    @if (selectedTab === 'active') {
+      @if (activeSurveys.length > 0) {
+        <div class="surveys__grid">
+          @for (survey of activeSurveys; track survey.id) {
+            <app-survey-card
+              [survey]="survey">
+            </app-survey-card>
+          }
+        </div>
+      } @else {
+        <p class="surveys__empty">
+          No active surveys available.
+        </p>
+      }
+    }
+
+    <!-- Past surveys -->
+    @if (selectedTab === 'past') {
+      @if (pastSurveys.length > 0) {
+        <div class="surveys__grid">
+          @for (survey of pastSurveys; track survey.id) {
+            <app-survey-card
+              [survey]="survey">
+            </app-survey-card>
+          }
+        </div>
+      } @else {
+        <p class="surveys__empty">
+          No past surveys available.
+        </p>
+      }
+    }
+
   </section>
 </main>
