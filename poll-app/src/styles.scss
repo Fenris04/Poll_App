@@ -1,1 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  --primary-purple: #342438;
+  --primary-orange: #ffb36b;
+  --secondary-orange: #ffd0a6;
+  --card-background: #faf5fc;
+}
+
+body {
+  margin: 0;
+  background-color: var(--primary-purple);
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+
+app-root {
+  display: block;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
+  box-sizing: border-box;
+}
+
