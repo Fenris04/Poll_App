@@ -1,9 +1,21 @@
-import { Component } from '@angular/core';
+
+import { Component, Input } from '@angular/core';
+import { DatePipe } from '@angular/common';
+
+export interface Survey {
+  id: string;
+  title: string;
+  category: string | null;
+  end_date: string | null;
+}
 
 @Component({
-  imports: [],
   selector: 'app-survey-card',
-  styleUrl: './survey-card.scss',
+  standalone: true,
+  imports: [DatePipe],
   templateUrl: './survey-card.html',
+  styleUrl: './survey-card.scss'
 })
-export class SurveyCard {}
+export class SurveyCard {
+  @Input({ required: true }) survey!: Survey;
+}
