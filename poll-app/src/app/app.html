@@ -8,14 +8,14 @@
 
     <h3 class="surveys__subtitle">Ending soon surveys</h3>
 
-    @if (surveys.length > 0) {
+    @if (endingSoonSurveys.length > 0) {
       <div class="surveys__grid">
-        @for (survey of surveys; track survey.id) {
+        @for (survey of endingSoonSurveys; track survey.id) {
           <app-survey-card [survey]="survey"></app-survey-card>
         }
       </div>
     } @else {
-      <p>No surveys available.</p>
+      <p class="surveys__empty">No surveys ending soon.</p>
     }
   </section>
 </main>
