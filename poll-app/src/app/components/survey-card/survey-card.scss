@@ -1,0 +1,36 @@
+
+.survey-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 260px;
+  padding: 28px;
+  box-sizing: border-box;
+  background-color: var(--card-background);
+  color: var(--primary-purple);
+  border-radius: 0 65px 0 0;
+
+  &__category {
+    font-family: 'Mulish', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    font-family: 'Mulish', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  &__date {
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 4px 8px;
+    background-color: var(--secondary-orange);
+    font-family: 'Mulish', sans-serif;
+    font-size: 12px;
+  }
+}
