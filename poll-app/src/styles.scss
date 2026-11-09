@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import url('https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;700&family=Nerko+One&family=Nokora:wght@400;700&display=swap');
+
+
 :root {
   --primary-purple: #342438;
   --primary-orange: #ffb36b;
@@ -11,7 +14,7 @@ body {
   margin: 0;
   background-color: var(--primary-purple);
   color: white;
-  font-family: Arial, sans-serif;
+  font-family: 'Mulish', sans-serif;
 }
 
 
