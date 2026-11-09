@@ -3,9 +3,10 @@ import { RouterOutlet } from '@angular/router';
 import { Supabase } from './services/supabase';
 import { Header } from './components/header/header';
 import { Hero } from './components/hero/hero';
+import { SurveyCard } from './components/survey-card/survey-card';
 
 @Component({
-  imports: [RouterOutlet, Header, Hero],
+  imports: [RouterOutlet, Header, Hero, SurveyCard],
   selector: 'app-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',

@@ -1,0 +1,30 @@
+
+.surveys {
+  padding: 60px 0;
+
+  h2 {
+    font-family: 'Nerko One', cursive;
+    font-size: 56px;
+    font-weight: 400;
+    color: var(--primary-orange);
+    margin: 0 0 32px;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .surveys__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .surveys__grid {
+    grid-template-columns: 1fr;
+  }
+}

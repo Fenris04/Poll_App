@@ -1,19 +1,22 @@
+
 <app-header></app-header>
+
 <app-hero></app-hero>
 
 <main class="poll-app">
-  <h1>Poll App</h1>
+  <section class="surveys">
+    <h2>Your surveys</h2>
 
-  @if (surveys.length > 0) {
-    <section class="survey">
-      <h2>{{ surveys[0].title }}</h2>
-      <p>{{ surveys[0].description }}</p>
-
-      @for (option of surveyOptions; track option.id) {
-        <p>○ {{ option.text }}</p>
-      }
-    </section>
-  } @else {
-    <p>No surveys available.</p>
-  }
+    @if (surveys.length > 0) {
+      <div class="surveys__grid">
+        @for (survey of surveys; track survey.id) {
+          <app-survey-card
+            [survey]="survey"
+          ></app-survey-card>
+        }
+      </div>
+    } @else {
+      <p>No surveys available.</p>
+    }
+  </section>
 </main>
