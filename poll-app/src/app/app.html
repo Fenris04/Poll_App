@@ -6,16 +6,16 @@
   <section class="surveys">
     <h2>Your surveys</h2>
 
-    <h3 class="surveys__subtitle">Ending soon surveys</h3>
+    <h3 class="surveys__subtitle">Active surveys</h3>
 
-    @if (endingSoonSurveys.length > 0) {
+    @if (activeSurveys.length > 0) {
       <div class="surveys__grid">
-        @for (survey of endingSoonSurveys; track survey.id) {
+        @for (survey of activeSurveys; track survey.id) {
           <app-survey-card [survey]="survey"></app-survey-card>
         }
       </div>
     } @else {
-      <p class="surveys__empty">No surveys ending soon.</p>
+      <p class="surveys__empty">No active surveys available.</p>
     }
   </section>
 </main>

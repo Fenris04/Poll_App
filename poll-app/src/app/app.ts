@@ -52,4 +52,16 @@ export class App {
       return remaining > 0 && remaining <= sevenDays;
     });
   }
+
+  get activeSurveys() {
+    const now = Date.now();
+
+    return this.surveys.filter(survey => {
+      if (!survey.end_date) return true;
+
+      const endDate = new Date(survey.end_date).getTime();
+      return endDate > now;
+    });
+  }
+
 }
