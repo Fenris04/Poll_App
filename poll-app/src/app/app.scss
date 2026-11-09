@@ -7,7 +7,16 @@
     font-size: 56px;
     font-weight: 400;
     color: var(--primary-orange);
-    margin: 0 0 32px;
+    text-align: center;
+    margin: 0 0 48px;
+  }
+
+  &__subtitle {
+    font-family: 'Mulish', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 24px;
   }
 
   &__grid {
