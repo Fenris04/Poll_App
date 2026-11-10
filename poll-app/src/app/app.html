@@ -27,44 +27,58 @@
       </p>
     }
 
-    <!-- Active and past survey tabs -->
-    <div class="surveys__tabs">
-      <button
-        type="button"
-        [class.surveys__tab--active]="selectedTab === 'active'"
-        [attr.aria-pressed]="selectedTab === 'active'"
-        (click)="selectedTab = 'active'">
-        Active surveys
-      </button>
+    <!-- Survey navigation -->
+    <div class="surveys__toolbar">
 
-      <button
-        type="button"
-        [class.surveys__tab--active]="selectedTab === 'past'"
-        [attr.aria-pressed]="selectedTab === 'past'"
-        (click)="selectedTab = 'past'">
-        Past surveys
-      </button>
-    </div>
+      <!-- Active and past survey tabs -->
+      <div class="surveys__tabs">
+        <button
+          type="button"
+          [class.surveys__tab--active]="selectedTab === 'active'"
+          [attr.aria-pressed]="selectedTab === 'active'"
+          (click)="selectedTab = 'active'">
+          Active survey
+        </button>
 
-    <!-- Category filter -->
-    <div class="surveys__filter">
-      <select
-        aria-label="Sort by categories"
-        [value]="selectedCategory"
-        (change)="onCategoryChange($event)">
+        <button
+          type="button"
+          [class.surveys__tab--active]="selectedTab === 'past'"
+          [attr.aria-pressed]="selectedTab === 'past'"
+          (click)="selectedTab = 'past'">
+          Past survey
+        </button>
+      </div>
 
-        <option value="All categories">
-          Sort by categories
-        </option>
+      <!-- Category filter -->
+      <div class="surveys__filter">
+        <div class="surveys__select">
+          <select
+            aria-label="Sort by categories"
+            [value]="selectedCategory"
+            (change)="onCategoryChange($event)">
 
-        @for (category of categories; track category) {
-          @if (category !== 'All categories') {
-            <option [value]="category">
-              {{ category }}
+            <option value="All categories">
+              Sort by categories
             </option>
-          }
-        }
-      </select>
+
+            @for (category of categories; track category) {
+              @if (category !== 'All categories') {
+                <option [value]="category">
+                  {{ category }}
+                </option>
+              }
+            }
+          </select>
+
+          <svg
+            class="surveys__arrow"
+            viewBox="0 0 20 12"
+            aria-hidden="true">
+            <path d="M1 1h18L10 11z" />
+          </svg>
+        </div>
+      </div>
+
     </div>
 
     <!-- Filtered surveys -->
