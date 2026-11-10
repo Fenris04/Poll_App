@@ -6,7 +6,13 @@
 
   &__logo img {
     display: block;
-    width: 90px;
+    width: 150px;
     height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .header__logo img {
+    width: 120px;
   }
 }
