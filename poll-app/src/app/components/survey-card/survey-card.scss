@@ -2,19 +2,26 @@
 .survey-card {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  justify-content: space-between;
   min-height: 260px;
+  width: 100%;
   padding: 28px;
   box-sizing: border-box;
   background-color: var(--card-background);
   color: var(--primary-purple);
   border-radius: 0 65px 0 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
   &__category {
     font-family: 'Mulish', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
-    margin-bottom: 8px;
   }
 
   &__title {
@@ -23,14 +30,43 @@
     font-weight: 700;
     line-height: 1.2;
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   &__date {
     align-self: flex-start;
-    margin-top: auto;
-    padding: 4px 8px;
     background-color: var(--secondary-orange);
+    color: var(--primary-purple);
+    padding: 8px 12px;
+    border-radius: 6px;
     font-family: 'Mulish', sans-serif;
-    font-size: 12px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@media (max-width: 600px) {
+  .survey-card {
+    min-height: 220px;
+    padding: 20px;
+
+    &__title {
+      font-size: 20px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .survey-card {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
   }
 }

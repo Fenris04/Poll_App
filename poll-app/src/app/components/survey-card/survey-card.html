@@ -1,16 +1,16 @@
 
 <article class="survey-card">
-  <span class="survey-card__category">
-    {{ survey.category || 'General' }}
-  </span>
-
-  <h3 class="survey-card__title">
-    {{ survey.title }}
-  </h3>
-
-  @if (survey.end_date) {
-    <span class="survey-card__date">
-      Ends on {{ survey.end_date | date:'dd.MM.yyyy' }}
+  <div class="survey-card__content">
+    <span class="survey-card__category">
+      {{ survey.category || 'General' }}
     </span>
-  }
+
+    <h3 class="survey-card__title">
+      {{ survey.title }}
+    </h3>
+  </div>
+
+  <span class="survey-card__date">
+    {{ expirationText }}
+  </span>
 </article>
