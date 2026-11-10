@@ -64,4 +64,16 @@ export class Supabase {
     return data;
   }
 
+
+  async getSurveyQuestions(surveyId: string) {
+    const { data, error } = await this.supabase
+      .from('survey_questions')
+      .select('id, survey_id, title, allow_multiple_choices, position')
+      .eq('survey_id', surveyId)
+      .order('position', { ascending: true });
+
+    if (error) throw error;
+    return data;
+  }
+
 }

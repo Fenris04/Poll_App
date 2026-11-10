@@ -14,6 +14,7 @@ import { Header } from '../../components/header/header';
 export class SurveyDetail implements OnInit {
   survey = signal<any>(null);
   options = signal<any[]>([]);
+  questions = signal<any[]>([]);
   loading = signal(true);
   errorMessage = signal('');
 
@@ -36,8 +37,10 @@ export class SurveyDetail implements OnInit {
   async loadSurvey(id: string) {
     try {
       const survey = await this.supabaseService.getSurveyById(id);
-      this.survey.set(survey);
+      const questions = await this.supabaseService.getSurveyQuestions(id);
       const options = await this.supabaseService.getSurveyOptions(id);
+      this.survey.set(survey);
+      this.questions.set(questions);
       this.options.set(options);
     } catch (error) {
       console.error('Failed to load survey:', error);
@@ -46,4 +49,5 @@ export class SurveyDetail implements OnInit {
       this.loading.set(false);
     }
   }
+
 }
