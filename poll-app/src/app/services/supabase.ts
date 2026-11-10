@@ -52,4 +52,16 @@ export class Supabase {
     return data;
   }
 
+
+  async getSurveyById(id: string) {
+    const { data, error } = await this.client
+      .from('surveys')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
 }
