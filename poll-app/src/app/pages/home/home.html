@@ -1,1 +1,80 @@
-<p>home works!</p>
+
+<app-header></app-header>
+
+<app-hero></app-hero>
+
+<main class="poll-app">
+  <section class="surveys">
+    <h2>Your surveys</h2>
+
+    <h3 class="surveys__subtitle">Ending soon surveys</h3>
+
+    @if (endingSoonSurveys.length > 0) {
+      <div class="surveys__grid">
+        @for (survey of endingSoonSurveys; track survey.id) {
+          <app-survey-card [survey]="survey"></app-survey-card>
+        }
+      </div>
+    } @else {
+      <p class="surveys__empty">No surveys ending soon.</p>
+    }
+
+    <div class="surveys__toolbar">
+      <div class="surveys__tabs">
+        <button
+          type="button"
+          [class.surveys__tab--active]="selectedTab === 'active'"
+          [attr.aria-pressed]="selectedTab === 'active'"
+          (click)="selectedTab = 'active'">
+          Active survey
+        </button>
+
+        <button
+          type="button"
+          [class.surveys__tab--active]="selectedTab === 'past'"
+          [attr.aria-pressed]="selectedTab === 'past'"
+          (click)="selectedTab = 'past'">
+          Past survey
+        </button>
+      </div>
+
+      <div class="surveys__filter">
+        <div class="surveys__select">
+          <select
+            aria-label="Sort by categories"
+            [value]="selectedCategory"
+            (change)="onCategoryChange($event)">
+            <option value="All categories">
+              Sort by categories
+            </option>
+
+            @for (category of categories; track category) {
+              @if (category !== 'All categories') {
+                <option [value]="category">
+                  {{ category }}
+                </option>
+              }
+            }
+          </select>
+
+          <svg
+            class="surveys__arrow"
+            viewBox="0 0 20 12"
+            aria-hidden="true">
+            <path d="M1 1h18L10 11z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    @if (displayedSurveys.length > 0) {
+      <div class="surveys__grid">
+        @for (survey of displayedSurveys; track survey.id) {
+          <app-survey-card [survey]="survey"></app-survey-card>
+        }
+      </div>
+    } @else {
+      <p class="surveys__empty">No surveys found.</p>
+    }
+  </section>
+</main>
