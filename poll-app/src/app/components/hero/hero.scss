@@ -7,26 +7,31 @@
   padding: 60px 0;
 
   &__content {
-    max-width: 520px;
+    flex: 1;
+    min-width: 0;
+    max-width: 900px;
   }
 
   h1 {
     font-family: 'Nerko One', cursive;
     font-weight: 400;
-    font-size: clamp(42px, 5.2vw, 100px);
+    font-size: clamp(48px, 6.5vw, 100px);
     line-height: 0.89;
     color: var(--primary-orange);
     margin: 0;
   }
 
+  
   p {
     font-family: 'Mulish', sans-serif;
     font-weight: 600;
-    font-size: clamp(16px, 1.25vw, 24px);
-    line-height: 1;
+    font-size: 24px;
+    line-height: 1.5;
     color: white;
-    margin: 24px 0;
+    max-width: 760px;
+    margin: 32px 0 40px;
   }
+
 
   &__button {
     display: inline-flex;
@@ -70,26 +75,31 @@
   }
 
   &__image {
-    width: 40%;
-    max-width: 350px;
+    width: 35%;
+    max-width: 420px;
     height: auto;
+    flex-shrink: 0;
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .hero {
     flex-direction: column;
     align-items: flex-start;
     gap: 32px;
-    padding: 40px 0;
 
     &__content {
       max-width: 100%;
     }
 
+    p {
+      font-size: 18px;
+      max-width: 100%;
+    }
+
     &__image {
-      width: 70%;
-      max-width: 300px;
+      width: 65%;
+      max-width: 350px;
       align-self: center;
     }
   }
