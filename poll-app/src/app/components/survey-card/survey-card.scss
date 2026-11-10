@@ -11,6 +11,13 @@
   color: var(--primary-purple);
   border-radius: 0 65px 0 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid var(--primary-orange);
+    outline-offset: 4px;
+  }
 
   &__content {
     display: flex;

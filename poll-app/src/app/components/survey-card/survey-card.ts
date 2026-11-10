@@ -1,5 +1,6 @@
 
 import { Component, Input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 export interface Survey {
   id: string;
@@ -11,7 +12,7 @@ export interface Survey {
 @Component({
   selector: 'app-survey-card',
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './survey-card.html',
   styleUrl: './survey-card.scss'
 })

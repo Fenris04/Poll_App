@@ -1,5 +1,9 @@
 
-<article class="survey-card">
+<a
+  class="survey-card"
+  [routerLink]="['/survey', survey.id]"
+  [attr.aria-label]="'Open survey: ' + survey.title">
+
   <div class="survey-card__content">
     <span class="survey-card__category">
       {{ survey.category || 'General' }}
@@ -13,4 +17,4 @@
   <span class="survey-card__date">
     {{ expirationText }}
   </span>
-</article>
+</a>
