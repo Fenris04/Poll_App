@@ -75,4 +75,33 @@ export class App {
       return endDate <= now;
     });
   }
+
+  
+  selectedCategory = 'All categories';
+
+  get categories(): string[] {
+    const names = this.surveys
+      .map(survey => survey.category)
+      .filter((category): category is string => !!category);
+
+    return ['All categories', ...new Set(names)];
+  }
+
+  get displayedSurveys() {
+    const surveys = this.selectedTab === 'active'
+      ? this.activeSurveys
+      : this.pastSurveys;
+
+    if (this.selectedCategory === 'All categories') return surveys;
+
+    return surveys.filter(
+      survey => survey.category === this.selectedCategory
+    );
+  }
+
+  onCategoryChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.selectedCategory = select.value;
+  }
+
 }

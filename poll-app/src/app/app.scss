@@ -58,6 +58,29 @@
       }
     }
   }
+
+  &__filter {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 28px;
+
+    select {
+      padding: 12px 36px 12px 18px;
+      border: 1px solid var(--secondary-orange);
+      border-radius: 6px;
+      background-color: var(--secondary-orange);
+      color: var(--primary-purple);
+      font-family: 'Mulish', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+
+      &:focus-visible {
+        outline: 2px solid white;
+        outline-offset: 3px;
+      }
+    }
+  }
 }
 
 @media (max-width: 900px) {
@@ -76,6 +99,14 @@
 
     button {
       font-size: 18px;
+    }
+  }
+
+  .surveys__filter {
+    justify-content: flex-start;
+
+    select {
+      max-width: 100%;
     }
   }
 }

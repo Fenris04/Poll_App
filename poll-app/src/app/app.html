@@ -46,38 +46,40 @@
       </button>
     </div>
 
-    <!-- Active surveys -->
-    @if (selectedTab === 'active') {
-      @if (activeSurveys.length > 0) {
-        <div class="surveys__grid">
-          @for (survey of activeSurveys; track survey.id) {
-            <app-survey-card
-              [survey]="survey">
-            </app-survey-card>
-          }
-        </div>
-      } @else {
-        <p class="surveys__empty">
-          No active surveys available.
-        </p>
-      }
-    }
+    <!-- Category filter -->
+    <div class="surveys__filter">
+      <select
+        aria-label="Sort by categories"
+        [value]="selectedCategory"
+        (change)="onCategoryChange($event)">
 
-    <!-- Past surveys -->
-    @if (selectedTab === 'past') {
-      @if (pastSurveys.length > 0) {
-        <div class="surveys__grid">
-          @for (survey of pastSurveys; track survey.id) {
-            <app-survey-card
-              [survey]="survey">
-            </app-survey-card>
+        <option value="All categories">
+          Sort by categories
+        </option>
+
+        @for (category of categories; track category) {
+          @if (category !== 'All categories') {
+            <option [value]="category">
+              {{ category }}
+            </option>
           }
-        </div>
-      } @else {
-        <p class="surveys__empty">
-          No past surveys available.
-        </p>
-      }
+        }
+      </select>
+    </div>
+
+    <!-- Filtered surveys -->
+    @if (displayedSurveys.length > 0) {
+      <div class="surveys__grid">
+        @for (survey of displayedSurveys; track survey.id) {
+          <app-survey-card
+            [survey]="survey">
+          </app-survey-card>
+        }
+      </div>
+    } @else {
+      <p class="surveys__empty">
+        No surveys found.
+      </p>
     }
 
   </section>
