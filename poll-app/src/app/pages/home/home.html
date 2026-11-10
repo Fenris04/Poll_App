@@ -9,9 +9,9 @@
 
     <h3 class="surveys__subtitle">Ending soon surveys</h3>
 
-    @if (endingSoonSurveys.length > 0) {
+    @if (endingSoonSurveys().length > 0) {
       <div class="surveys__grid">
-        @for (survey of endingSoonSurveys; track survey.id) {
+        @for (survey of endingSoonSurveys(); track survey.id) {
           <app-survey-card [survey]="survey"></app-survey-card>
         }
       </div>
@@ -23,17 +23,17 @@
       <div class="surveys__tabs">
         <button
           type="button"
-          [class.surveys__tab--active]="selectedTab === 'active'"
-          [attr.aria-pressed]="selectedTab === 'active'"
-          (click)="selectedTab = 'active'">
+          [class.surveys__tab--active]="selectedTab() === 'active'"
+          [attr.aria-pressed]="selectedTab() === 'active'"
+          (click)="selectedTab.set('active')">
           Active survey
         </button>
 
         <button
           type="button"
-          [class.surveys__tab--active]="selectedTab === 'past'"
-          [attr.aria-pressed]="selectedTab === 'past'"
-          (click)="selectedTab = 'past'">
+          [class.surveys__tab--active]="selectedTab() === 'past'"
+          [attr.aria-pressed]="selectedTab() === 'past'"
+          (click)="selectedTab.set('past')">
           Past survey
         </button>
       </div>
@@ -42,13 +42,13 @@
         <div class="surveys__select">
           <select
             aria-label="Sort by categories"
-            [value]="selectedCategory"
+            [value]="selectedCategory()"
             (change)="onCategoryChange($event)">
             <option value="All categories">
               Sort by categories
             </option>
 
-            @for (category of categories; track category) {
+            @for (category of categories(); track category) {
               @if (category !== 'All categories') {
                 <option [value]="category">
                   {{ category }}
@@ -67,9 +67,9 @@
       </div>
     </div>
 
-    @if (displayedSurveys.length > 0) {
+    @if (displayedSurveys().length > 0) {
       <div class="surveys__grid">
-        @for (survey of displayedSurveys; track survey.id) {
+        @for (survey of displayedSurveys(); track survey.id) {
           <app-survey-card [survey]="survey"></app-survey-card>
         }
       </div>

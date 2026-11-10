@@ -1,9 +1,9 @@
 
-import { Component } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { Supabase } from '../../services/supabase';
 import { Header } from '../../components/header/header';
 import { Hero } from '../../components/hero/hero';
-import { SurveyCard } from '../../components/survey-card/survey-card';
+import { SurveyCard, Survey } from '../../components/survey-card/survey-card';
 
 @Component({
   selector: 'app-home',
@@ -13,77 +13,71 @@ import { SurveyCard } from '../../components/survey-card/survey-card';
   styleUrl: './home.scss'
 })
 export class Home {
-  surveys: any[] = [];
-  surveyOptions: any[] = [];
-  selectedTab: 'active' | 'past' = 'active';
-  selectedCategory = 'All categories';
+  surveys = signal<Survey[]>([]);
+  selectedTab = signal<'active' | 'past'>('active');
+  selectedCategory = signal('All categories');
 
   constructor(private supabaseService: Supabase) {
     this.loadSurveys();
   }
 
-  async loadSurveys() {
-    try {
-      this.surveys = await this.supabaseService.getSurveys();
-      await this.loadFirstSurveyOptions();
-    } catch (error) {
-      console.error('Failed to load surveys:', error);
-    }
-  }
+  
+async loadSurveys() {
+  console.log('1. Starting survey request');
 
-  async loadFirstSurveyOptions() {
-    if (this.surveys.length === 0) return;
-    this.surveyOptions = await this.supabaseService
-      .getSurveyOptions(this.surveys[0].id);
+  try {
+    const surveys = await this.supabaseService.getSurveys();
+    console.log('2. Surveys received:', surveys);
+    this.surveys.set(surveys);
+    console.log('3. Signal updated:', this.surveys());
+  } catch (error) {
+    console.error('4. Survey request failed:', error);
   }
+}
 
-  get endingSoonSurveys() {
+
+  endingSoonSurveys = computed(() => {
     const now = Date.now();
     const sevenDays = 7 * 24 * 60 * 60 * 1000;
-
-    return this.surveys.filter(survey => {
+    return this.surveys().filter(survey => {
       if (!survey.end_date) return false;
       const remaining = new Date(survey.end_date).getTime() - now;
       return remaining > 0 && remaining <= sevenDays;
     });
-  }
+  });
 
-  get activeSurveys() {
+  activeSurveys = computed(() => {
     const now = Date.now();
+    return this.surveys().filter(survey =>
+      !survey.end_date || new Date(survey.end_date).getTime() > now
+    );
+  });
 
-    return this.surveys.filter(survey => {
-      if (!survey.end_date) return true;
-      return new Date(survey.end_date).getTime() > now;
-    });
-  }
-
-  get pastSurveys() {
+  pastSurveys = computed(() => {
     const now = Date.now();
+    return this.surveys().filter(survey =>
+      !!survey.end_date && new Date(survey.end_date).getTime() <= now
+    );
+  });
 
-    return this.surveys.filter(survey => {
-      if (!survey.end_date) return false;
-      return new Date(survey.end_date).getTime() <= now;
-    });
-  }
-
-  get categories(): string[] {
-    const names = this.surveys
+  categories = computed(() => {
+    const names = this.surveys()
       .map(survey => survey.category)
       .filter((category): category is string => !!category);
-
     return ['All categories', ...new Set(names)];
-  }
+  });
 
-  get displayedSurveys() {
-    const surveys = this.selectedTab === 'active'
-      ? this.activeSurveys : this.pastSurveys;
-
-    if (this.selectedCategory === 'All categories') return surveys;
-    return surveys.filter(survey => survey.category === this.selectedCategory);
-  }
+  displayedSurveys = computed(() => {
+    const surveys = this.selectedTab() === 'active'
+      ? this.activeSurveys() : this.pastSurveys();
+    if (this.selectedCategory() === 'All categories') return surveys;
+    return surveys.filter(survey =>
+      survey.category === this.selectedCategory()
+    );
+  });
 
   onCategoryChange(event: Event) {
     const select = event.target as HTMLSelectElement;
-    this.selectedCategory = select.value;
+    this.selectedCategory.set(select.value);
   }
 }
