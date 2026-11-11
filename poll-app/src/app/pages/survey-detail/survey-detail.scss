@@ -17,18 +17,6 @@
 
 .survey-page {
   font-family: 'Mulish', sans-serif;
-  
-&__vote-message {
-  margin: 32px 0 0;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.5;
-}
-
-&__complete:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
   &__header {
     display: flex;
@@ -225,7 +213,7 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: var(--primary-orange);
     }
 
@@ -233,6 +221,18 @@
       outline: 2px solid var(--primary-purple);
       outline-offset: 3px;
     }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__vote-message {
+    margin: 32px 0 0;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
   }
 
   &__results {
@@ -263,6 +263,54 @@
     margin-top: 100px;
     text-align: center;
     font-weight: 700;
+  }
+
+  &__result-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin-top: 48px;
+  }
+
+  &__result-question {
+    h3 {
+      margin: 0 0 24px;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+  }
+
+  &__result-option {
+    margin-bottom: 20px;
+  }
+
+  &__result-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+    font-size: 16px;
+
+    strong {
+      font-weight: 700;
+    }
+  }
+
+  &__result-track {
+    width: 100%;
+    height: 16px;
+    background-color: #f3eef5;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  &__result-bar {
+    height: 100%;
+    background-color: var(--primary-orange);
+    border-radius: 8px;
+    transition: width 0.4s ease;
   }
 
   &__error {
@@ -318,6 +366,11 @@
       flex-direction: column;
       gap: 12px;
     }
+
+    &__result-questions {
+      margin-top: 32px;
+      gap: 32px;
+    }
   }
 }
 
@@ -325,7 +378,8 @@
   .survey-page {
     &__create,
     &__create img,
-    &__complete {
+    &__complete,
+    &__result-bar {
       transition: none;
     }
   }

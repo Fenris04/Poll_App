@@ -114,4 +114,20 @@ export class SurveyDetail implements OnInit {
       .filter(result => result.question_id === questionId)
       .reduce((total, result) => total + Number(result.vote_count), 0);
   }
+
+  getVotePercentage(questionId: string, voteCount: number): number {
+    const total = this.getTotalVotes(questionId);
+
+    if (total === 0) return 0;
+
+    return Math.round((Number(voteCount) / total) * 100);
+  }
+
+  getTotalVotesForSurvey(): number {
+    return this.results().reduce(
+      (total, result) => total + Number(result.vote_count),
+      0
+    );
+  }
+
 }

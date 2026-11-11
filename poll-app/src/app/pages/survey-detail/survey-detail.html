@@ -1,12 +1,19 @@
+
 <div class="survey-page">
   <header class="survey-page__header">
     <a routerLink="/" aria-label="Poll App home">
-      <img src="/assets/img/logo_purple_dark.svg" alt="Poll App" class="survey-page__logo" />
+      <img
+        src="/assets/img/logo_purple_dark.svg"
+        alt="Poll App"
+        class="survey-page__logo" />
     </a>
 
     <a class="survey-page__create" routerLink="/create-survey">
       <span>Create survey</span>
-      <img src="/assets/img/primary_button_add_circle.svg" alt="" aria-hidden="true" />
+      <img
+        src="/assets/img/primary_button_add_circle.svg"
+        alt=""
+        aria-hidden="true" />
     </a>
   </header>
 
@@ -19,9 +26,13 @@
       </p>
     } @else if (survey(); as currentSurvey) {
       <div class="survey-page__layout">
+
+        <!-- LEFT: SURVEY FORM -->
         <section class="survey-page__form">
           <div class="survey-page__meta">
-            <span class="survey-page__status"> Published </span>
+            <span class="survey-page__status">
+              Published
+            </span>
 
             <span class="survey-page__category">
               Category: {{ currentSurvey.category || 'General' }}
@@ -30,7 +41,8 @@
 
           @if (currentSurvey.end_date) {
             <p class="survey-page__end-date">
-              Ends on {{ currentSurvey.end_date | date: 'dd.MM.yyyy' }}
+              Ends on
+              {{ currentSurvey.end_date | date:'dd.MM.yyyy' }}
             </p>
           }
 
@@ -43,31 +55,43 @@
           }
 
           <div class="survey-page__questions">
-            @for (question of questions(); track question.id; let i = $index) {
+            @for (
+              question of questions();
+              track question.id;
+              let i = $index
+            ) {
               <section class="survey-page__question">
-                <h2>{{ i + 1 }}. {{ question.title }}</h2>
+                <h2>
+                  {{ i + 1 }}. {{ question.title }}
+                </h2>
 
                 <p class="survey-page__hint">
-                  {{
-                    question.allow_multiple_choices
-                      ? 'More than one answer is possible.'
-                      : 'Select one answer.'
-                  }}
+                  {{ question.allow_multiple_choices
+                    ? 'More than one answer is possible.'
+                    : 'Select one answer.' }}
                 </p>
 
                 <div class="survey-page__options">
-                  @for (option of options(); track option.id; let j = $index) {
+                  @for (
+                    option of options();
+                    track option.id;
+                    let j = $index
+                  ) {
                     @if (option.question_id === question.id) {
                       <label class="survey-page__option">
                         <input
-                          [type]="question.allow_multiple_choices ? 'checkbox' : 'radio'"
+                          [type]="question.allow_multiple_choices
+                            ? 'checkbox'
+                            : 'radio'"
                           [name]="'question-' + question.id"
                           [checked]="isSelected(question.id, option.id)"
-                          (change)="selectAnswer(question, option.id)"
-                        />
+                          [disabled]="voteSubmitted() || submitting()"
+                          (change)="selectAnswer(question, option.id)" />
 
                         <span>
-                          <strong>{{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.</strong>
+                          <strong>
+                            {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
+                          </strong>
                           {{ option.text }}
                         </span>
                       </label>
@@ -91,19 +115,17 @@
               type="button"
               class="survey-page__complete"
               [disabled]="submitting() || voteSubmitted()"
-              (click)="completeSurvey()"
-            >
-              {{
-                submitting()
-                  ? 'Submitting...'
-                  : voteSubmitted()
-                    ? 'Survey completed'
-                    : 'Complete survey'
-              }}
+              (click)="completeSurvey()">
+              {{ submitting()
+                ? 'Submitting...'
+                : voteSubmitted()
+                  ? 'Survey completed'
+                  : 'Complete survey' }}
             </button>
           </div>
         </section>
 
+        <!-- RIGHT: SURVEY RESULTS -->
         <aside class="survey-page__results">
           <h2>
             Survey results
@@ -111,11 +133,64 @@
           </h2>
 
           <p class="survey-page__results-info">
-            Results will be shown here after participants complete the survey.
+            Results will be shown here after participants
+            complete the survey.
           </p>
 
-          <p class="survey-page__no-results">There are no answers yet.</p>
+          @if (
+            results().length === 0 ||
+            getTotalVotesForSurvey() === 0
+          ) {
+            <p class="survey-page__no-results">
+              There are no answers yet.
+            </p>
+          } @else {
+            <div class="survey-page__result-questions">
+              @for (
+                question of questions();
+                track question.id;
+                let i = $index
+              ) {
+                <section class="survey-page__result-question">
+                  <h3>
+                    {{ i + 1 }}. {{ question.title }}
+                  </h3>
+
+                  @for (
+                    result of results();
+                    track result.option_id
+                  ) {
+                    @if (result.question_id === question.id) {
+                      <div class="survey-page__result-option">
+                        <div class="survey-page__result-label">
+                          <span>{{ result.option_text }}</span>
+
+                          <strong>
+                            {{ getVotePercentage(
+                              question.id,
+                              result.vote_count
+                            ) }}%
+                          </strong>
+                        </div>
+
+                        <div class="survey-page__result-track">
+                          <div
+                            class="survey-page__result-bar"
+                            [style.width.%]="getVotePercentage(
+                              question.id,
+                              result.vote_count
+                            )">
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  }
+                </section>
+              }
+            </div>
+          }
         </aside>
+
       </div>
     }
   </main>
