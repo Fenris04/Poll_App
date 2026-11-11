@@ -15,6 +15,7 @@
     </div>
 
     <form
+      id="create-survey-form"
       class="create-survey__form"
       (ngSubmit)="publishSurvey()">
 
@@ -38,7 +39,14 @@
                 class="create-survey__delete"
                 aria-label="Clear survey name"
                 (click)="clearSurveyName()">
-                <img src="/assets/img/delete.svg" alt="" />
+                <img
+                  class="create-survey__delete-default"
+                  src="/assets/img/delete.svg"
+                  alt="" />
+                <img
+                  class="create-survey__delete-hover"
+                  src="/assets/img/delete_dark.svg"
+                  alt="" />
               </button>
             </div>
           </div>
@@ -63,7 +71,14 @@
                   class="create-survey__delete"
                   aria-label="Clear end date"
                   (click)="clearEndDate()">
-                  <img src="/assets/img/delete.svg" alt="" />
+                  <img
+                    class="create-survey__delete-default"
+                    src="/assets/img/delete.svg"
+                    alt="" />
+                  <img
+                    class="create-survey__delete-hover"
+                    src="/assets/img/delete_dark.svg"
+                    alt="" />
                 </button>
               </div>
             </div>
@@ -104,7 +119,14 @@
               class="create-survey__delete"
               aria-label="Clear description"
               (click)="clearDescription()">
-              <img src="/assets/img/delete.svg" alt="" />
+              <img
+                class="create-survey__delete-default"
+                src="/assets/img/delete.svg"
+                alt="" />
+              <img
+                class="create-survey__delete-hover"
+                src="/assets/img/delete_dark.svg"
+                alt="" />
             </button>
           </div>
         </div>
@@ -131,7 +153,14 @@
                 [disabled]="questions().length === 1"
                 [attr.aria-label]="'Remove question ' + (i + 1)"
                 (click)="removeQuestion(question.id)">
-                <img src="/assets/img/delete.svg" alt="" />
+                <img
+                  class="create-survey__delete-default"
+                  src="/assets/img/delete.svg"
+                  alt="" />
+                <img
+                  class="create-survey__delete-hover"
+                  src="/assets/img/delete_dark.svg"
+                  alt="" />
               </button>
             </div>
 
@@ -166,6 +195,7 @@
                 let j = $index
               ) {
                 <div class="create-survey__answer">
+
                   <span class="create-survey__letter">
                     {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
                   </span>
@@ -184,8 +214,16 @@
                     [disabled]="question.answers.length <= 2"
                     [attr.aria-label]="'Remove answer ' + (j + 1)"
                     (click)="removeAnswer(question.id, j)">
-                    <img src="/assets/img/delete.svg" alt="" />
+                    <img
+                      class="create-survey__delete-default"
+                      src="/assets/img/delete.svg"
+                      alt="" />
+                    <img
+                      class="create-survey__delete-hover"
+                      src="/assets/img/delete_dark.svg"
+                      alt="" />
                   </button>
+
                 </div>
               }
 
@@ -250,19 +288,21 @@
         </span>
       </button>
 
-      <div class="create-survey__actions">
-        <button
-          type="submit"
-          class="create-survey__publish">
-          <span>Publish</span>
-
-          <img
-            src="/assets/img/primary_button_check.svg"
-            alt=""
-            aria-hidden="true" />
-        </button>
-      </div>
-
     </form>
+
+    <div class="create-survey__actions">
+      <button
+        type="submit"
+        form="create-survey-form"
+        class="create-survey__publish">
+        <span>Publish</span>
+
+        <img
+          src="/assets/img/primary_button_check.svg"
+          alt=""
+          aria-hidden="true" />
+      </button>
+    </div>
+
   </section>
 </main>
