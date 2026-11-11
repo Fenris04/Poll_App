@@ -76,4 +76,18 @@ export class Supabase {
     return data;
   }
 
+  async submitVote(
+    surveyId: string,
+    optionIds: string[]
+  ): Promise<string> {
+    const { data, error } = await this.supabase.rpc('submit_vote', {
+      p_survey_id: surveyId,
+      p_option_ids: optionIds
+    });
+
+    if (error) throw error;
+
+    return data as string;
+  }
+
 }
