@@ -54,14 +54,45 @@
     gap: 16px;
   }
 
-  &__option {
-    padding: 20px 24px;
-    background-color: var(--card-background);
-    color: var(--primary-purple);
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: 600;
+  
+&__option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background-color: var(--card-background);
+  color: var(--primary-purple);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+
+  input {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--primary-purple);
+    cursor: pointer;
   }
+
+  &:hover {
+    background-color: var(--secondary-orange);
+  }
+
+  &--selected {
+    background-color: var(--secondary-orange);
+    border-color: var(--primary-orange);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--primary-orange);
+    outline-offset: 3px;
+  }
+}
+
 
   &__error {
     color: var(--secondary-orange);

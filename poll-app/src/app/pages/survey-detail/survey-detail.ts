@@ -50,4 +50,25 @@ export class SurveyDetail implements OnInit {
     }
   }
 
+
+  selectedAnswers = signal<Record<string, string[]>>({});
+
+  isSelected(questionId: string, optionId: string): boolean {
+    return (this.selectedAnswers()[questionId] ?? []).includes(optionId);
+  }
+
+  selectAnswer(question: any, optionId: string) {
+    const selected = this.selectedAnswers()[question.id] ?? [];
+    const answers = question.allow_multiple_choices
+      ? selected.includes(optionId)
+        ? selected.filter(id => id !== optionId)
+        : [...selected, optionId]
+      : [optionId];
+  
+    this.selectedAnswers.update(current => ({
+      ...current,
+      [question.id]: answers
+    }));
+  }
+
 }
