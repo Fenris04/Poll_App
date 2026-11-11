@@ -1,8 +1,16 @@
+
 import { Injectable } from '@angular/core';
 import {
   createClient,
   SupabaseClient
 } from '@supabase/supabase-js';
+
+export interface SurveyResult {
+  question_id: string;
+  option_id: string;
+  option_text: string;
+  vote_count: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -21,22 +29,29 @@ export class Supabase {
     return this.supabase;
   }
 
-  
   async getSurveys() {
     const { data, error } = await this.supabase
       .from('surveys')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error loading surveys:', error);
-      throw error;
-    }
+    if (error) throw error;
+
+    return data ?? [];
+  }
+
+  async getSurveyById(id: string) {
+    const { data, error } = await this.supabase
+      .from('surveys')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
 
     return data;
   }
 
-  
   async getSurveyOptions(surveyId: string) {
     const { data, error } = await this.supabase
       .from('survey_options')
@@ -44,26 +59,10 @@ export class Supabase {
       .eq('survey_id', surveyId)
       .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('Error loading survey options:', error);
-      throw error;
-    }
-
-    return data;
-  }
-
-
-  async getSurveyById(id: string) {
-    const { data, error } = await this.client
-      .from('surveys')
-      .select('*')
-      .eq('id', id)
-      .single();
-
     if (error) throw error;
-    return data;
-  }
 
+    return data ?? [];
+  }
 
   async getSurveyQuestions(surveyId: string) {
     const { data, error } = await this.supabase
@@ -73,7 +72,8 @@ export class Supabase {
       .order('position', { ascending: true });
 
     if (error) throw error;
-    return data;
+
+    return data ?? [];
   }
 
   async submitVote(
@@ -90,4 +90,14 @@ export class Supabase {
     return data as string;
   }
 
+  async getSurveyResults(surveyId: string): Promise<SurveyResult[]> {
+    const { data, error } = await this.supabase.rpc(
+      'get_survey_results',
+      { p_survey_id: surveyId }
+    );
+
+    if (error) throw error;
+
+    return (data ?? []) as SurveyResult[];
+  }
 }

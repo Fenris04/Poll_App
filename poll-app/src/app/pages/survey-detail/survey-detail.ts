@@ -1,14 +1,14 @@
 
 import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Supabase } from '../../services/supabase';
-import { Header } from '../../components/header/header';
 import { DatePipe } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+
+import { Supabase, SurveyResult } from '../../services/supabase';
 
 @Component({
   selector: 'app-survey-detail',
   standalone: true,
-  imports: [Header, RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe],
   templateUrl: './survey-detail.html',
   styleUrl: './survey-detail.scss'
 })
@@ -16,20 +16,23 @@ export class SurveyDetail implements OnInit {
   survey = signal<any>(null);
   options = signal<any[]>([]);
   questions = signal<any[]>([]);
+  results = signal<SurveyResult[]>([]);
+
   loading = signal(true);
-  errorMessage = signal('');
   submitting = signal(false);
-  voteMessage = signal('');
   voteSubmitted = signal(false);
 
+  errorMessage = signal('');
+  voteMessage = signal('');
 
+  selectedAnswers = signal<Record<string, string[]>>({});
 
   constructor(
     private route: ActivatedRoute,
     private supabaseService: Supabase
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
 
     if (id) {
@@ -40,7 +43,7 @@ export class SurveyDetail implements OnInit {
     }
   }
 
-  async loadSurvey(id: string) {
+  async loadSurvey(id: string): Promise<void> {
     try {
       const survey = await this.supabaseService.getSurveyById(id);
       const questions = await this.supabaseService.getSurveyQuestions(id);
@@ -48,6 +51,7 @@ export class SurveyDetail implements OnInit {
       this.survey.set(survey);
       this.questions.set(questions);
       this.options.set(options);
+      await this.loadResults(id);
     } catch (error) {
       console.error('Failed to load survey:', error);
       this.errorMessage.set('Survey could not be loaded.');
@@ -56,42 +60,38 @@ export class SurveyDetail implements OnInit {
     }
   }
 
-
-  selectedAnswers = signal<Record<string, string[]>>({});
-
   isSelected(questionId: string, optionId: string): boolean {
     return (this.selectedAnswers()[questionId] ?? []).includes(optionId);
   }
 
-  selectAnswer(question: any, optionId: string) {
+  selectAnswer(question: any, optionId: string): void {
+    if (this.voteSubmitted() || this.submitting()) return;
     const selected = this.selectedAnswers()[question.id] ?? [];
     const answers = question.allow_multiple_choices
       ? selected.includes(optionId)
         ? selected.filter(id => id !== optionId)
         : [...selected, optionId]
       : [optionId];
-
     this.selectedAnswers.update(current => ({
       ...current,
       [question.id]: answers
     }));
   }
 
-
   getSelectedOptionIds(): string[] {
     return Object.values(this.selectedAnswers()).flat();
   }
 
- 
   async completeSurvey(): Promise<void> {
     const surveyId = this.survey()?.id;
     if (!surveyId || this.submitting() || this.voteSubmitted()) return;
-      this.voteMessage.set('');
-      this.submitting.set(true);
+    this.voteMessage.set('');
+    this.submitting.set(true);
     try {
       await this.supabaseService.submitVote(surveyId, this.getSelectedOptionIds());
       this.voteSubmitted.set(true);
       this.voteMessage.set('Thank you! Your answers have been submitted.');
+      await this.loadResults(surveyId);
     } catch (error) {
       console.error('Failed to submit vote:', error);
       this.voteMessage.set('Please answer every question and try again.');
@@ -100,5 +100,18 @@ export class SurveyDetail implements OnInit {
     }
   }
 
+  async loadResults(surveyId: string): Promise<void> {
+    try {
+      const results = await this.supabaseService.getSurveyResults(surveyId);
+      this.results.set(results);
+    } catch (error) {
+      console.error('Failed to load results:', error);
+    }
+  }
 
+  getTotalVotes(questionId: string): number {
+    return this.results()
+      .filter(result => result.question_id === questionId)
+      .reduce((total, result) => total + Number(result.vote_count), 0);
+  }
 }
