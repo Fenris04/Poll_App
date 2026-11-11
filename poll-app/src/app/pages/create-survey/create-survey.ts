@@ -1,3 +1,4 @@
+
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -56,6 +57,7 @@ export class CreateSurvey {
 
   removeQuestion(id: number): void {
     if (this.questions().length <= 1) return;
+
     this.questions.update(questions =>
       questions.filter(question => question.id !== id)
     );
@@ -64,7 +66,7 @@ export class CreateSurvey {
   addAnswer(questionId: number): void {
     this.questions.update(questions =>
       questions.map(question =>
-        question.id === questionId
+        question.id === questionId && question.answers.length < 6
           ? { ...question, answers: [...question.answers, ''] }
           : question
       )
@@ -75,7 +77,10 @@ export class CreateSurvey {
     this.questions.update(questions =>
       questions.map(question =>
         question.id === questionId && question.answers.length > 2
-          ? { ...question, answers: question.answers.filter((_, i) => i !== answerIndex) }
+          ? {
+              ...question,
+              answers: question.answers.filter((_, i) => i !== answerIndex)
+            }
           : question
       )
     );
@@ -101,7 +106,12 @@ export class CreateSurvey {
     this.questions.update(questions =>
       questions.map(question =>
         question.id === id
-          ? { ...question, answers: question.answers.map((a, i) => i === index ? value : a) }
+          ? {
+              ...question,
+              answers: question.answers.map((answer, i) =>
+                i === index ? value : answer
+              )
+            }
           : question
       )
     );
