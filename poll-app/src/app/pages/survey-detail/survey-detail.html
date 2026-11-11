@@ -9,7 +9,11 @@
     </a>
 
     <a class="survey-page__create" routerLink="/create-survey">
-      Create survey
+      <span>Create survey</span>
+      <img
+        src="/assets/img/primary_button_add_circle.svg"
+        alt=""
+        aria-hidden="true" />
     </a>
   </header>
 
@@ -17,12 +21,17 @@
     @if (loading()) {
       <p>Loading survey...</p>
     } @else if (errorMessage()) {
-      <p class="survey-page__error">{{ errorMessage() }}</p>
+      <p class="survey-page__error">
+        {{ errorMessage() }}
+      </p>
     } @else if (survey(); as currentSurvey) {
       <div class="survey-page__layout">
         <section class="survey-page__form">
           <div class="survey-page__meta">
-            <span class="survey-page__status">Published</span>
+            <span class="survey-page__status">
+              Published
+            </span>
+
             <span class="survey-page__category">
               Category: {{ currentSurvey.category || 'General' }}
             </span>
@@ -43,9 +52,15 @@
           }
 
           <div class="survey-page__questions">
-            @for (question of questions(); track question.id; let i = $index) {
+            @for (
+              question of questions();
+              track question.id;
+              let i = $index
+            ) {
               <section class="survey-page__question">
-                <h2>{{ i + 1 }}. {{ question.title }}</h2>
+                <h2>
+                  {{ i + 1 }}. {{ question.title }}
+                </h2>
 
                 <p class="survey-page__hint">
                   {{ question.allow_multiple_choices
@@ -54,11 +69,17 @@
                 </p>
 
                 <div class="survey-page__options">
-                  @for (option of options(); track option.id; let j = $index) {
+                  @for (
+                    option of options();
+                    track option.id;
+                    let j = $index
+                  ) {
                     @if (option.question_id === question.id) {
                       <label class="survey-page__option">
                         <input
-                          [type]="question.allow_multiple_choices ? 'checkbox' : 'radio'"
+                          [type]="question.allow_multiple_choices
+                            ? 'checkbox'
+                            : 'radio'"
                           [name]="'question-' + question.id"
                           [checked]="isSelected(question.id, option.id)"
                           (change)="selectAnswer(question, option.id)" />
@@ -72,11 +93,15 @@
                   }
                 </div>
               </section>
+            } @empty {
+              <p>No questions available.</p>
             }
           </div>
 
           <div class="survey-page__actions">
-            <button type="button" class="survey-page__complete">
+            <button
+              type="button"
+              class="survey-page__complete">
               Complete survey
             </button>
           </div>
