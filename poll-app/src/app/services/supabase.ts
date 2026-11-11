@@ -101,4 +101,28 @@ export class Supabase {
 
     return (data ?? []) as SurveyResult[];
   }
+
+  async createSurvey(data: {
+    title: string;
+    description: string;
+    category: string;
+    endDate: string;
+    questions: {
+      title: string;
+      allowMultiple: boolean;
+      answers: string[];
+    }[];
+  }): Promise<string> {
+    const { data: surveyId, error } = await this.client.rpc('create_survey', {
+      p_title: data.title,
+      p_description: data.description,
+      p_category: data.category,
+      p_end_date: data.endDate ? `${data.endDate}T23:59:59` : null,
+      p_questions: data.questions
+    });
+
+    if (error) throw error;
+    return surveyId as string;
+  }
+
 }
