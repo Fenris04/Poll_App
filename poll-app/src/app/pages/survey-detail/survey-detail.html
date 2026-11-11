@@ -80,8 +80,21 @@
             }
           </div>
 
+          @if (voteMessage()) {
+            <p class="survey-page__vote-message" role="status">
+              {{ voteMessage() }}
+            </p>
+          }
+
           <div class="survey-page__actions">
-            <button type="button" class="survey-page__complete">Complete survey</button>
+            <button
+              type="button"
+              class="survey-page__complete"
+              [disabled]="submitting()"
+              (click)="completeSurvey()"
+            >
+              {{ submitting() ? 'Submitting...' : 'Complete survey' }}
+            </button>
           </div>
         </section>
 

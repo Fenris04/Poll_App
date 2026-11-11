@@ -18,6 +18,9 @@ export class SurveyDetail implements OnInit {
   questions = signal<any[]>([]);
   loading = signal(true);
   errorMessage = signal('');
+  submitting = signal(false);
+  voteMessage = signal('');
+
 
   constructor(
     private route: ActivatedRoute,
@@ -70,6 +73,30 @@ export class SurveyDetail implements OnInit {
       ...current,
       [question.id]: answers
     }));
+  }
+
+
+  getSelectedOptionIds(): string[] {
+    return Object.values(this.selectedAnswers()).flat();
+  }
+
+  async completeSurvey(): Promise<void> {
+    const surveyId = this.survey()?.id;
+    if (!surveyId || this.submitting()) return;
+
+    this.voteMessage.set('');
+    const optionIds = this.getSelectedOptionIds();
+
+    this.submitting.set(true);
+    try {
+      await this.supabaseService.submitVote(surveyId, optionIds);
+      this.voteMessage.set('Thank you! Your answers have been submitted.');
+    } catch (error) {
+      console.error('Failed to submit vote:', error);
+      this.voteMessage.set('Please answer every question and try again.');
+    } finally {
+      this.submitting.set(false);
+    }
   }
 
 }

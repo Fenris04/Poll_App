@@ -17,6 +17,18 @@
 
 .survey-page {
   font-family: 'Mulish', sans-serif;
+  
+&__vote-message {
+  margin: 32px 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+&__complete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
   &__header {
     display: flex;
