@@ -15,8 +15,10 @@
     </div>
 
     <form
+      #surveyForm
       id="create-survey-form"
       class="create-survey__form"
+      novalidate
       (ngSubmit)="publishSurvey()">
 
       <div class="create-survey__grid">
@@ -32,6 +34,10 @@
                 name="surveyName"
                 type="text"
                 [(ngModel)]="surveyName"
+                (ngModelChange)="refreshValidation()"
+                [class.create-survey__invalid]="submitted() && isEmpty(surveyName)"
+                [attr.aria-invalid]="submitted() && isEmpty(surveyName)"
+                [attr.aria-describedby]="submitted() && isEmpty(surveyName) ? 'survey-name-error' : null"
                 required />
 
               <button
@@ -49,6 +55,12 @@
                   alt="" />
               </button>
             </div>
+
+            @if (submitted() && isEmpty(surveyName)) {
+              <p id="survey-name-error" class="create-survey__field-error">
+                Please enter a survey name.
+              </p>
+            }
           </div>
 
           <div class="create-survey__details-bottom">
@@ -64,7 +76,11 @@
                   id="end-date"
                   name="endDate"
                   type="date"
-                  [(ngModel)]="endDate" />
+                  [(ngModel)]="endDate"
+                  (ngModelChange)="refreshValidation()"
+                  [class.create-survey__invalid]="submitted() && isEndDateInvalid()"
+                  [attr.aria-invalid]="submitted() && isEndDateInvalid()"
+                  [attr.aria-describedby]="submitted() && isEndDateInvalid() ? 'end-date-error' : null" />
 
                 <button
                   type="button"
@@ -81,6 +97,12 @@
                     alt="" />
                 </button>
               </div>
+
+              @if (submitted() && isEndDateInvalid()) {
+                <p id="end-date-error" class="create-survey__field-error">
+                  Please choose a future end date.
+                </p>
+              }
             </div>
 
             <div class="create-survey__field">
@@ -89,13 +111,24 @@
               <select
                 id="category"
                 name="category"
-                [(ngModel)]="category">
+                [(ngModel)]="category"
+                (ngModelChange)="refreshValidation()"
+                [class.create-survey__invalid]="submitted() && !category"
+                [attr.aria-invalid]="submitted() && !category"
+                [attr.aria-describedby]="submitted() && !category ? 'category-error' : null"
+                required>
                 <option value="">Select</option>
 
                 @for (item of categories; track item) {
                   <option [value]="item">{{ item }}</option>
                 }
               </select>
+
+              @if (submitted() && !category) {
+                <p id="category-error" class="create-survey__field-error">
+                  Please choose a category.
+                </p>
+              }
             </div>
 
           </div>
@@ -170,8 +203,19 @@
               [name]="'question-' + question.id"
               [ngModel]="question.title"
               (ngModelChange)="updateQuestionTitle(question.id, $event)"
+              [class.create-survey__invalid]="submitted() && isQuestionInvalid(question.id)"
+              [attr.aria-invalid]="submitted() && isQuestionInvalid(question.id)"
+              [attr.aria-describedby]="submitted() && isQuestionInvalid(question.id) ? 'question-error-' + question.id : null"
               placeholder="Which date would work best for you?"
               required />
+
+            @if (submitted() && isQuestionInvalid(question.id)) {
+              <p
+                [id]="'question-error-' + question.id"
+                class="create-survey__field-error">
+                Please enter a question.
+              </p>
+            }
 
             <div class="create-survey__answers-heading">
               <span>Answers</span>
@@ -200,13 +244,26 @@
                     {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
                   </span>
 
-                  <input
-                    type="text"
-                    [name]="'answer-' + question.id + '-' + j"
-                    [ngModel]="answer"
-                    (ngModelChange)="updateAnswer(question.id, j, $event)"
-                    [attr.aria-label]="'Answer ' + (j + 1)"
-                    required />
+                  <div class="create-survey__answer-field">
+                    <input
+                      type="text"
+                      [name]="'answer-' + question.id + '-' + j"
+                      [ngModel]="answer"
+                      (ngModelChange)="updateAnswer(question.id, j, $event)"
+                      [class.create-survey__invalid]="submitted() && isAnswerInvalid(question.id, j)"
+                      [attr.aria-invalid]="submitted() && isAnswerInvalid(question.id, j)"
+                      [attr.aria-describedby]="submitted() && isAnswerInvalid(question.id, j) ? 'answer-error-' + question.id + '-' + j : null"
+                      [attr.aria-label]="'Answer ' + (j + 1)"
+                      required />
+
+                    @if (submitted() && isAnswerInvalid(question.id, j)) {
+                      <p
+                        [id]="'answer-error-' + question.id + '-' + j"
+                        class="create-survey__field-error">
+                        Please enter an answer.
+                      </p>
+                    }
+                  </div>
 
                   <button
                     type="button"
@@ -291,6 +348,19 @@
     </form>
 
     <div class="create-survey__actions">
+      @if (errorMessage()) {
+        <div class="create-survey__notification" role="alert">
+          <span class="create-survey__notification-icon" aria-hidden="true">
+            !
+          </span>
+
+          <div>
+            <strong>{{ errorMessage() }}</strong>
+            <p>Check the highlighted fields before publishing your survey.</p>
+          </div>
+        </div>
+      }
+
       <button
         type="submit"
         form="create-survey-form"
