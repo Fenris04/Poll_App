@@ -4,11 +4,12 @@ import { Supabase } from '../../services/supabase';
 import { Header } from '../../components/header/header';
 import { Hero } from '../../components/hero/hero';
 import { SurveyCard, Survey } from '../../components/survey-card/survey-card';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [Header, Hero, SurveyCard],
+  imports: [Header, Hero, SurveyCard, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
