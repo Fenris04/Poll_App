@@ -4,16 +4,13 @@
 
     <div class="create-survey__top">
       <div>
-        <span class="create-survey__badge">
-          Draft
-        </span>
-
+        <span class="create-survey__badge">Draft</span>
         <h1>Create new survey</h1>
       </div>
 
       <a routerLink="/" class="create-survey__cancel">
-        Cancel
-        <span aria-hidden="true">×</span>
+        <span>Cancel</span>
+        <span class="create-survey__close" aria-hidden="true">×</span>
       </a>
     </div>
 
@@ -26,9 +23,7 @@
         <div class="create-survey__details">
 
           <div class="create-survey__field">
-            <label for="survey-name">
-              Survey name
-            </label>
+            <label for="survey-name">Survey name</label>
 
             <div class="create-survey__input-row">
               <input
@@ -43,9 +38,7 @@
                 class="create-survey__delete"
                 aria-label="Clear survey name"
                 (click)="clearSurveyName()">
-                <img
-                  src="/assets/img/delete.svg"
-                  alt="" />
+                <img src="/assets/img/delete.svg" alt="" />
               </button>
             </div>
           </div>
@@ -70,17 +63,13 @@
                   class="create-survey__delete"
                   aria-label="Clear end date"
                   (click)="clearEndDate()">
-                  <img
-                    src="/assets/img/delete.svg"
-                    alt="" />
+                  <img src="/assets/img/delete.svg" alt="" />
                 </button>
               </div>
             </div>
 
             <div class="create-survey__field">
-              <label for="category">
-                Choose category
-              </label>
+              <label for="category">Choose category</label>
 
               <select
                 id="category"
@@ -89,9 +78,7 @@
                 <option value="">Select</option>
 
                 @for (item of categories; track item) {
-                  <option [value]="item">
-                    {{ item }}
-                  </option>
+                  <option [value]="item">{{ item }}</option>
                 }
               </select>
             </div>
@@ -105,9 +92,7 @@
             <span>(optional)</span>
           </label>
 
-          <div
-            class="create-survey__input-row create-survey__input-row--top">
-
+          <div class="create-survey__input-row create-survey__input-row--top">
             <textarea
               id="description"
               name="description"
@@ -119,9 +104,7 @@
               class="create-survey__delete"
               aria-label="Clear description"
               (click)="clearDescription()">
-              <img
-                src="/assets/img/delete.svg"
-                alt="" />
+              <img src="/assets/img/delete.svg" alt="" />
             </button>
           </div>
         </div>
@@ -148,9 +131,7 @@
                 [disabled]="questions().length === 1"
                 [attr.aria-label]="'Remove question ' + (i + 1)"
                 (click)="removeQuestion(question.id)">
-                <img
-                  src="/assets/img/delete.svg"
-                  alt="" />
+                <img src="/assets/img/delete.svg" alt="" />
               </button>
             </div>
 
@@ -159,10 +140,7 @@
               type="text"
               [name]="'question-' + question.id"
               [ngModel]="question.title"
-              (ngModelChange)="updateQuestionTitle(
-                question.id,
-                $event
-              )"
+              (ngModelChange)="updateQuestionTitle(question.id, $event)"
               placeholder="Which date would work best for you?"
               required />
 
@@ -174,12 +152,9 @@
                   type="checkbox"
                   [name]="'multiple-' + question.id"
                   [ngModel]="question.allowMultiple"
-                  (ngModelChange)="updateMultipleChoice(
-                    question.id,
-                    $event
-                  )" />
+                  (ngModelChange)="updateMultipleChoice(question.id, $event)" />
 
-                Allow multiple answers.
+                <span>Allow multiple answers.</span>
               </label>
             </div>
 
@@ -191,7 +166,6 @@
                 let j = $index
               ) {
                 <div class="create-survey__answer">
-
                   <span class="create-survey__letter">
                     {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
                   </span>
@@ -200,11 +174,7 @@
                     type="text"
                     [name]="'answer-' + question.id + '-' + j"
                     [ngModel]="answer"
-                    (ngModelChange)="updateAnswer(
-                      question.id,
-                      j,
-                      $event
-                    )"
+                    (ngModelChange)="updateAnswer(question.id, j, $event)"
                     [attr.aria-label]="'Answer ' + (j + 1)"
                     required />
 
@@ -214,31 +184,43 @@
                     [disabled]="question.answers.length <= 2"
                     [attr.aria-label]="'Remove answer ' + (j + 1)"
                     (click)="removeAnswer(question.id, j)">
-                    <img
-                      src="/assets/img/delete.svg"
-                      alt="" />
+                    <img src="/assets/img/delete.svg" alt="" />
                   </button>
-
                 </div>
               }
 
             </div>
 
-            @if (question.answers.length < 6) {
-              <button
-                type="button"
-                class="create-survey__add-answer"
-                (click)="addAnswer(question.id)">
-                Add answer
-                <span aria-hidden="true">⊕</span>
-              </button>
-            } @else {
-              <p
-                class="create-survey__answer-limit"
-                role="status">
-                You can add up to 6 answer fields.
-              </p>
-            }
+            <div class="create-survey__answer-actions">
+              @if (question.answers.length < 6) {
+                <button
+                  type="button"
+                  class="create-survey__add-answer"
+                  (click)="addAnswer(question.id)">
+                  <span>Add answer</span>
+
+                  <span class="create-survey__plus-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="currentColor"
+                        stroke-width="2" />
+                      <path
+                        d="M12 7V17M7 12H17"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round" />
+                    </svg>
+                  </span>
+                </button>
+              } @else {
+                <p class="create-survey__answer-limit" role="status">
+                  You can add up to 6 answer fields.
+                </p>
+              }
+            </div>
 
           </section>
         }
@@ -249,15 +231,35 @@
         type="button"
         class="create-survey__add-question"
         (click)="addQuestion()">
-        Add next question
-        <span aria-hidden="true">⊕</span>
+        <span>Add next question</span>
+
+        <span class="create-survey__plus-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle
+              cx="12"
+              cy="12"
+              r="9"
+              stroke="currentColor"
+              stroke-width="2" />
+            <path
+              d="M12 7V17M7 12H17"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round" />
+          </svg>
+        </span>
       </button>
 
       <div class="create-survey__actions">
         <button
           type="submit"
           class="create-survey__publish">
-          Publish
+          <span>Publish</span>
+
+          <img
+            src="/assets/img/primary_button_check.svg"
+            alt=""
+            aria-hidden="true" />
         </button>
       </div>
 
