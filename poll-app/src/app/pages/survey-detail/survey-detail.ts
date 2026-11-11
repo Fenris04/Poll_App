@@ -20,6 +20,8 @@ export class SurveyDetail implements OnInit {
   errorMessage = signal('');
   submitting = signal(false);
   voteMessage = signal('');
+  voteSubmitted = signal(false);
+
 
 
   constructor(
@@ -80,16 +82,15 @@ export class SurveyDetail implements OnInit {
     return Object.values(this.selectedAnswers()).flat();
   }
 
+ 
   async completeSurvey(): Promise<void> {
     const surveyId = this.survey()?.id;
-    if (!surveyId || this.submitting()) return;
-
-    this.voteMessage.set('');
-    const optionIds = this.getSelectedOptionIds();
-
-    this.submitting.set(true);
+    if (!surveyId || this.submitting() || this.voteSubmitted()) return;
+      this.voteMessage.set('');
+      this.submitting.set(true);
     try {
-      await this.supabaseService.submitVote(surveyId, optionIds);
+      await this.supabaseService.submitVote(surveyId, this.getSelectedOptionIds());
+      this.voteSubmitted.set(true);
       this.voteMessage.set('Thank you! Your answers have been submitted.');
     } catch (error) {
       console.error('Failed to submit vote:', error);
@@ -98,5 +99,6 @@ export class SurveyDetail implements OnInit {
       this.submitting.set(false);
     }
   }
+
 
 }

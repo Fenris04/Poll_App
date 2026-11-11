@@ -90,10 +90,16 @@
             <button
               type="button"
               class="survey-page__complete"
-              [disabled]="submitting()"
+              [disabled]="submitting() || voteSubmitted()"
               (click)="completeSurvey()"
             >
-              {{ submitting() ? 'Submitting...' : 'Complete survey' }}
+              {{
+                submitting()
+                  ? 'Submitting...'
+                  : voteSubmitted()
+                    ? 'Survey completed'
+                    : 'Complete survey'
+              }}
             </button>
           </div>
         </section>
