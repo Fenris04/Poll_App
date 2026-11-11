@@ -1,61 +1,103 @@
-<app-header></app-header>
 
-<main class="survey-detail">
-  <a class="survey-detail__back" routerLink="/"> ← Back to surveys </a>
+<div class="survey-page">
+  <header class="survey-page__header">
+    <a routerLink="/" aria-label="Poll App home">
+      <img
+        src="/assets/img/logo_purple_dark.svg"
+        alt="Poll App"
+        class="survey-page__logo" />
+    </a>
 
-  @if (loading()) {
-    <p>Loading survey...</p>
-  } @else if (errorMessage()) {
-    <p class="survey-detail__error">
-      {{ errorMessage() }}
-    </p>
-  } @else if (survey(); as currentSurvey) {
-    <section class="survey-detail__content">
-      <span class="survey-detail__category">
-        {{ currentSurvey.category || 'General' }}
-      </span>
+    <a class="survey-page__create" routerLink="/create-survey">
+      Create survey
+    </a>
+  </header>
 
-      <h1>{{ currentSurvey.title }}</h1>
+  <main class="survey-page__main">
+    @if (loading()) {
+      <p>Loading survey...</p>
+    } @else if (errorMessage()) {
+      <p class="survey-page__error">{{ errorMessage() }}</p>
+    } @else if (survey(); as currentSurvey) {
+      <div class="survey-page__layout">
+        <section class="survey-page__form">
+          <div class="survey-page__meta">
+            <span class="survey-page__status">Published</span>
+            <span class="survey-page__category">
+              Category: {{ currentSurvey.category || 'General' }}
+            </span>
+          </div>
 
-      @if (currentSurvey.description) {
-        <p class="survey-detail__description">
-          {{ currentSurvey.description }}
-        </p>
-      }
+          @if (currentSurvey.end_date) {
+            <p class="survey-page__end-date">
+              Ends on {{ currentSurvey.end_date | date:'dd.MM.yyyy' }}
+            </p>
+          }
 
-      @for (question of questions(); track question.id) {
-        <section class="survey-detail__question">
-          <h2>{{ question.title }}</h2>
+          <h1>{{ currentSurvey.title }}</h1>
 
-          <p>
-            {{
-              question.allow_multiple_choices ? 'Select one or more answers' : 'Select one answer'
-            }}
-          </p>
+          @if (currentSurvey.description) {
+            <p class="survey-page__description">
+              {{ currentSurvey.description }}
+            </p>
+          }
 
-          <div class="survey-detail__options">
-            @for (option of options(); track option.id) {
-              @if (option.question_id === question.id) {
-                <label
-                  class="survey-detail__option"
-                  [class.survey-detail__option--selected]="isSelected(question.id, option.id)"
-                >
-                  <input
-                    [type]="question.allow_multiple_choices ? 'checkbox' : 'radio'"
-                    [name]="'question-' + question.id"
-                    [checked]="isSelected(question.id, option.id)"
-                    (change)="selectAnswer(question, option.id)"
-                  />
+          <div class="survey-page__questions">
+            @for (question of questions(); track question.id; let i = $index) {
+              <section class="survey-page__question">
+                <h2>{{ i + 1 }}. {{ question.title }}</h2>
 
-                  <span>{{ option.text }}</span>
-                </label>
-              }
+                <p class="survey-page__hint">
+                  {{ question.allow_multiple_choices
+                    ? 'More than one answer is possible.'
+                    : 'Select one answer.' }}
+                </p>
+
+                <div class="survey-page__options">
+                  @for (option of options(); track option.id; let j = $index) {
+                    @if (option.question_id === question.id) {
+                      <label class="survey-page__option">
+                        <input
+                          [type]="question.allow_multiple_choices ? 'checkbox' : 'radio'"
+                          [name]="'question-' + question.id"
+                          [checked]="isSelected(question.id, option.id)"
+                          (change)="selectAnswer(question, option.id)" />
+
+                        <span>
+                          {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
+                          {{ option.text }}
+                        </span>
+                      </label>
+                    }
+                  }
+                </div>
+              </section>
             }
           </div>
+
+          <div class="survey-page__actions">
+            <button type="button" class="survey-page__complete">
+              Complete survey
+            </button>
+          </div>
         </section>
-      } @empty {
-        <p>No questions available.</p>
-      }
-    </section>
-  }
-</main>
+
+        <aside class="survey-page__results">
+          <h2>
+            Survey results
+            <span>LIVE</span>
+          </h2>
+
+          <p>
+            Results will be shown here after participants
+            complete the survey.
+          </p>
+
+          <p class="survey-page__no-results">
+            There are no answers yet.
+          </p>
+        </aside>
+      </div>
+    }
+  </main>
+</div>

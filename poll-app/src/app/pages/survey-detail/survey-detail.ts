@@ -3,11 +3,12 @@ import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Supabase } from '../../services/supabase';
 import { Header } from '../../components/header/header';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-survey-detail',
   standalone: true,
-  imports: [Header, RouterLink],
+  imports: [Header, RouterLink, DatePipe],
   templateUrl: './survey-detail.html',
   styleUrl: './survey-detail.scss'
 })
@@ -64,7 +65,7 @@ export class SurveyDetail implements OnInit {
         ? selected.filter(id => id !== optionId)
         : [...selected, optionId]
       : [optionId];
-  
+
     this.selectedAnswers.update(current => ({
       ...current,
       [question.id]: answers
