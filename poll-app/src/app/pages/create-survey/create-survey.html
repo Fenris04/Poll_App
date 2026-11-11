@@ -1,1 +1,209 @@
-<p>create-survey works!</p>
+
+<main class="create-page">
+  <section class="create-survey">
+    <div class="create-survey__top">
+      <div>
+        <span class="create-survey__badge">Draft</span>
+        <h1>Create new survey</h1>
+      </div>
+
+      <a routerLink="/" class="create-survey__cancel">
+        Cancel
+        <span aria-hidden="true">×</span>
+      </a>
+    </div>
+
+    <form
+      class="create-survey__form"
+      (ngSubmit)="publishSurvey()">
+
+      <div class="create-survey__grid">
+        <div class="create-survey__details">
+          <div class="create-survey__field">
+            <label for="survey-name">Survey name</label>
+
+            <div class="create-survey__input-row">
+              <input
+                id="survey-name"
+                name="surveyName"
+                type="text"
+                [(ngModel)]="surveyName"
+                required />
+
+              <button
+                type="button"
+                class="create-survey__delete"
+                aria-label="Clear survey name"
+                (click)="clearSurveyName()">
+                <img src="/assets/img/delete.svg" alt="" />
+              </button>
+            </div>
+          </div>
+
+          <div class="create-survey__details-bottom">
+            <div class="create-survey__field">
+              <label for="end-date">
+                Set end date
+                <span>(optional)</span>
+              </label>
+
+              <div class="create-survey__input-row">
+                <input
+                  id="end-date"
+                  name="endDate"
+                  type="date"
+                  [(ngModel)]="endDate" />
+
+                <button
+                  type="button"
+                  class="create-survey__delete"
+                  aria-label="Clear end date"
+                  (click)="clearEndDate()">
+                  <img src="/assets/img/delete.svg" alt="" />
+                </button>
+              </div>
+            </div>
+
+            <div class="create-survey__field">
+              <label for="category">Choose category</label>
+
+              <select
+                id="category"
+                name="category"
+                [(ngModel)]="category">
+                <option value="">Select</option>
+                @for (item of categories; track item) {
+                  <option [value]="item">{{ item }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="create-survey__field">
+          <label for="description">
+            Describing text
+            <span>(optional)</span>
+          </label>
+
+          <div class="create-survey__input-row create-survey__input-row--top">
+            <textarea
+              id="description"
+              name="description"
+              rows="4"
+              [(ngModel)]="description">
+            </textarea>
+
+            <button
+              type="button"
+              class="create-survey__delete"
+              aria-label="Clear description"
+              (click)="clearDescription()">
+              <img src="/assets/img/delete.svg" alt="" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="create-survey__questions">
+        @for (
+          question of questions();
+          track question.id;
+          let i = $index
+        ) {
+          <section class="create-survey__question">
+            <div class="create-survey__question-heading">
+              <label [for]="'question-' + question.id">
+                {{ i + 1 }}. Question
+              </label>
+
+              <button
+                type="button"
+                class="create-survey__delete"
+                [disabled]="questions().length === 1"
+                [attr.aria-label]="'Remove question ' + (i + 1)"
+                (click)="removeQuestion(question.id)">
+                <img src="/assets/img/delete.svg" alt="" />
+              </button>
+            </div>
+
+            <input
+              [id]="'question-' + question.id"
+              type="text"
+              [name]="'question-' + question.id"
+              [ngModel]="question.title"
+              (ngModelChange)="updateQuestionTitle(question.id, $event)"
+              placeholder="Which date would work best for you?"
+              required />
+
+            <div class="create-survey__answers-heading">
+              <span>Answers</span>
+
+              <label class="create-survey__multiple">
+                <input
+                  type="checkbox"
+                  [name]="'multiple-' + question.id"
+                  [ngModel]="question.allowMultiple"
+                  (ngModelChange)="updateMultipleChoice(question.id, $event)" />
+                Allow multiple answers.
+              </label>
+            </div>
+
+            <div class="create-survey__answers">
+              @for (
+                answer of question.answers;
+                track $index;
+                let j = $index
+              ) {
+                <div class="create-survey__answer">
+                  <span class="create-survey__letter">
+                    {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
+                  </span>
+
+                  <input
+                    type="text"
+                    [name]="'answer-' + question.id + '-' + j"
+                    [ngModel]="answer"
+                    (ngModelChange)="updateAnswer(question.id, j, $event)"
+                    [attr.aria-label]="'Answer ' + (j + 1)"
+                    required />
+
+                  <button
+                    type="button"
+                    class="create-survey__delete"
+                    [disabled]="question.answers.length <= 2"
+                    [attr.aria-label]="'Remove answer ' + (j + 1)"
+                    (click)="removeAnswer(question.id, j)">
+                    <img src="/assets/img/delete.svg" alt="" />
+                  </button>
+                </div>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="create-survey__add-answer"
+              (click)="addAnswer(question.id)">
+              Add answer
+              <span aria-hidden="true">⊕</span>
+            </button>
+          </section>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="create-survey__add-question"
+        (click)="addQuestion()">
+        Add next question
+        <span aria-hidden="true">⊕</span>
+      </button>
+
+      <div class="create-survey__actions">
+        <button type="submit" class="create-survey__publish">
+          Publish
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
