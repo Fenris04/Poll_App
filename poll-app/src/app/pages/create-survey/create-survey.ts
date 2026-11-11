@@ -2,6 +2,8 @@
 import { Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { Supabase } from '../../services/supabase';
 
 interface SurveyQuestion {
   id: number;
@@ -33,6 +35,15 @@ export class CreateSurvey {
     'Lifestyle',
     'Other'
   ];
+
+  isPublishing = signal(false);
+  publishSuccess = signal(false);
+  publishedSurveyId = signal<string | null>(null);
+
+  constructor(
+    private supabase: Supabase,
+    private router: Router
+  ) {}
 
   questions = signal<SurveyQuestion[]>([
     {
@@ -192,7 +203,7 @@ export class CreateSurvey {
     field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  publishSurvey(): void {
+  async publishSurvey(): Promise<void> {
     this.submitted.set(true);
 
     if (!this.isFormValid()) {
@@ -201,8 +212,33 @@ export class CreateSurvey {
       return;
     }
 
-    this.errorMessage.set('');
-    console.log('Valid survey draft:', this.getSurveyDraft());
+    if (this.isPublishing()) return;
+      this.errorMessage.set('');
+      this.isPublishing.set(true);
+
+    await this.saveSurvey();
+  }
+
+  async saveSurvey(): Promise<void> {
+    try {
+      const surveyId = await this.supabase.createSurvey(this.getSurveyDraft());
+      this.publishedSurveyId.set(surveyId);
+      this.publishSuccess.set(true);
+    } catch (error) {
+      console.error('Error publishing survey:', error);
+      this.errorMessage.set('Publishing failed. Please try again.');
+    } finally {
+      this.isPublishing.set(false);
+    }
+  }
+
+  closeSuccessNotification(): void {
+    this.publishSuccess.set(false);
+  }
+
+  openPublishedSurvey(): void {
+    const id = this.publishedSurveyId();
+    if (id) this.router.navigate(['/survey', id]);
   }
 
   getSurveyDraft() {
@@ -211,7 +247,11 @@ export class CreateSurvey {
       description: this.description.trim(),
       endDate: this.endDate,
       category: this.category,
-      questions: this.questions()
+      questions: this.questions().map(question => ({
+        title: question.title.trim(),
+        allowMultiple: question.allowMultiple,
+        answers: question.answers.map(answer => answer.trim())
+      }))
     };
   }
 }
