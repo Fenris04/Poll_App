@@ -1,9 +1,19 @@
 
-import { Component, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  signal
+} from '@angular/core';
+
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
-import { Supabase, SurveyResult } from '../../services/supabase';
+import {
+  Supabase,
+  SurveyResult
+} from '../../services/supabase';
 
 @Component({
   selector: 'app-survey-detail',
@@ -12,7 +22,7 @@ import { Supabase, SurveyResult } from '../../services/supabase';
   templateUrl: './survey-detail.html',
   styleUrl: './survey-detail.scss'
 })
-export class SurveyDetail implements OnInit {
+export class SurveyDetail implements OnInit, OnDestroy {
   survey = signal<any>(null);
   options = signal<any[]>([]);
   questions = signal<any[]>([]);
@@ -27,6 +37,8 @@ export class SurveyDetail implements OnInit {
 
   selectedAnswers = signal<Record<string, string[]>>({});
 
+  private resultsChannel?: RealtimeChannel;
+
   constructor(
     private route: ActivatedRoute,
     private supabaseService: Supabase
@@ -36,7 +48,7 @@ export class SurveyDetail implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
 
     if (id) {
-      this.loadSurvey(id);
+      void this.loadSurvey(id);
     } else {
       this.errorMessage.set('Survey ID is missing.');
       this.loading.set(false);
@@ -52,6 +64,7 @@ export class SurveyDetail implements OnInit {
       this.questions.set(questions);
       this.options.set(options);
       await this.loadResults(id);
+      this.subscribeToResults(id);
     } catch (error) {
       console.error('Failed to load survey:', error);
       this.errorMessage.set('Survey could not be loaded.');
@@ -66,12 +79,14 @@ export class SurveyDetail implements OnInit {
 
   selectAnswer(question: any, optionId: string): void {
     if (this.voteSubmitted() || this.submitting()) return;
+
     const selected = this.selectedAnswers()[question.id] ?? [];
     const answers = question.allow_multiple_choices
       ? selected.includes(optionId)
         ? selected.filter(id => id !== optionId)
         : [...selected, optionId]
       : [optionId];
+
     this.selectedAnswers.update(current => ({
       ...current,
       [question.id]: answers
@@ -115,6 +130,13 @@ export class SurveyDetail implements OnInit {
       .reduce((total, result) => total + Number(result.vote_count), 0);
   }
 
+  getTotalVotesForSurvey(): number {
+    return this.results().reduce(
+      (total, result) => total + Number(result.vote_count),
+      0
+    );
+  }
+
   getVotePercentage(questionId: string, voteCount: number): number {
     const total = this.getTotalVotes(questionId);
 
@@ -123,11 +145,29 @@ export class SurveyDetail implements OnInit {
     return Math.round((Number(voteCount) / total) * 100);
   }
 
-  getTotalVotesForSurvey(): number {
-    return this.results().reduce(
-      (total, result) => total + Number(result.vote_count),
-      0
-    );
+  subscribeToResults(surveyId: string): void {
+    this.resultsChannel = this.supabaseService.client
+      .channel(`survey-results-${surveyId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'survey_result_notifications',
+          filter: `survey_id=eq.${surveyId}`
+        },
+        () => {
+          void this.loadResults(surveyId);
+        }
+      )
+      .subscribe();
   }
 
+  ngOnDestroy(): void {
+    if (this.resultsChannel) {
+      void this.supabaseService.client.removeChannel(
+        this.resultsChannel
+      );
+    }
+  }
 }
