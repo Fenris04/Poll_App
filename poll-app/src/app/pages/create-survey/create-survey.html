@@ -1,33 +1,5 @@
 
 <main class="create-page">
-
-  @if (publishSuccess()) {
-    <div
-      class="create-survey__success-overlay"
-      role="status"
-      aria-live="polite">
-
-      <div class="create-survey__success-toast">
-        <span>Your survey is now published</span>
-
-        <button
-          type="button"
-          aria-label="Close success notification"
-          (click)="closeSuccessNotification()">
-          ×
-        </button>
-      </div>
-
-      <button
-        type="button"
-        class="create-survey__view-survey"
-        (click)="openPublishedSurvey()">
-        View published survey
-      </button>
-
-    </div>
-  }
-
   <section class="create-survey">
 
     <div class="create-survey__top">
@@ -386,6 +358,33 @@
     </form>
 
     <div class="create-survey__actions">
+
+      @if (publishSuccess()) {
+        <div
+          class="create-survey__success-overlay"
+          role="status"
+          aria-live="polite">
+
+          <div class="create-survey__success-toast">
+            <span>Your survey is now published</span>
+
+            <button
+              type="button"
+              aria-label="Close success notification"
+              (click)="closeSuccessNotification()">
+              ×
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="create-survey__view-survey"
+            (click)="openPublishedSurvey()">
+            View published survey
+          </button>
+
+        </div>
+      }
 
       @if (errorMessage()) {
         <div

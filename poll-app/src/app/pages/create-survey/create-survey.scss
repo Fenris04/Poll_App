@@ -383,6 +383,7 @@
   }
 
   &__actions {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -476,15 +477,14 @@
   }
 
   &__success-overlay {
-    position: fixed;
-    top: 30px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 16px);
     z-index: 1000;
     width: min(360px, calc(100vw - 32px));
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 12px;
   }
 
