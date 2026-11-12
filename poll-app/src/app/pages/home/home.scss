@@ -24,24 +24,20 @@
     gap: 24px;
   }
 
-  // Ending soon: 3 große Karten
   &__grid--ending {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  // Active / Past: 2 Karten nebeneinander
   &__grid--list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px 24px;
   }
 
-  // Nur der untere Bereich ist scrollbar
   &__scroll-area {
     max-height: 360px;
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 14px;
-
     scrollbar-width: thin;
     scrollbar-color: var(--primary-orange) transparent;
 
@@ -59,8 +55,6 @@
     }
   }
 
-  // Die Darstellung der unteren Karten wird
-  // anschließend in survey-card angepasst.
   &__list-card {
     display: block;
     min-width: 0;
@@ -185,30 +179,108 @@
 }
 
 @media (max-width: 600px) {
-  .surveys__grid--ending,
-  .surveys__grid--list {
-    grid-template-columns: 1fr;
-  }
+  .surveys {
+    padding: 32px 0 48px;
 
-  .surveys__tabs {
-    gap: 12px;
+    h2 {
+      font-size: 44px;
+      margin-bottom: 32px;
+    }
 
-    button {
-      font-size: 16px;
-      padding: 8px 12px;
+    &__subtitle {
+      font-size: 22px;
+      margin: 32px 0 20px;
+    }
+
+    &__grid--ending {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(240px, 78%);
+      grid-template-columns: none;
+      gap: 16px;
+
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      padding: 4px 0 18px;
+
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary-orange) #49364d;
+
+      > app-survey-card {
+        scroll-snap-align: start;
+        min-width: 0;
+      }
+
+      &::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background-color: #49364d;
+        border-radius: 999px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: var(--primary-orange);
+        border-radius: 999px;
+      }
+    }
+
+    &__grid--list {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    &__scroll-area {
+      max-height: 480px;
+      padding-right: 8px;
+    }
+
+    &__toolbar {
+      margin: 40px 0 24px;
+      gap: 16px;
+    }
+
+    &__tabs {
+      gap: 12px;
+
+      button {
+        font-size: 16px;
+        padding: 8px 12px;
+      }
+    }
+
+    &__filter {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    &__select {
+      max-width: 100%;
+
+      select {
+        max-width: 100%;
+        font-size: 18px;
+      }
     }
   }
+}
 
-  .surveys__filter {
-    justify-content: flex-start;
-  }
+@media (max-width: 375px) {
+  .surveys {
+    &__grid--ending {
+      grid-auto-columns: minmax(220px, 76%);
+      gap: 12px;
+    }
 
-  .surveys__select {
-    max-width: 100%;
+    &__tabs {
+      gap: 8px;
 
-    select {
-      max-width: 100%;
-      font-size: 18px;
+      button {
+        padding: 8px 10px;
+      }
     }
   }
 }
