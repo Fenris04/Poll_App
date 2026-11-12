@@ -1,6 +1,7 @@
 
 <a
   class="survey-card"
+  [class.survey-card--compact]="compact"
   [routerLink]="['/survey', survey.id]"
   [attr.aria-label]="'Open survey: ' + survey.title">
 

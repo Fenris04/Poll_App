@@ -18,6 +18,7 @@ export interface Survey {
 })
 export class SurveyCard {
   @Input({ required: true }) survey!: Survey;
+  @Input() compact = false;
 
   get daysRemaining(): number | null {
     if (!this.survey.end_date) return null;

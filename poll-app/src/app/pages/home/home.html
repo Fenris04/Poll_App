@@ -73,7 +73,8 @@
           @for (survey of displayedSurveys(); track survey.id) {
             <app-survey-card
               class="surveys__list-card"
-              [survey]="survey">
+              [survey]="survey"
+              [compact]="true">
             </app-survey-card>
           }
         </div>

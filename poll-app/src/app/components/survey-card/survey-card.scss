@@ -55,6 +55,40 @@
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   }
+
+  // Kompakte Variante nur für Active / Past
+  &--compact {
+    height: 150px;
+    min-height: 150px;
+    padding: 18px 22px;
+    background-color: #49364d;
+    color: white;
+    border-radius: 0 55px 0 0;
+
+    .survey-card__content {
+      gap: 6px;
+    }
+
+    .survey-card__category {
+      color: var(--secondary-orange);
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .survey-card__title {
+      color: white;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .survey-card__date {
+      align-self: flex-end;
+      padding: 5px 9px;
+      border-radius: 0;
+      font-size: 16px;
+      font-weight: 400;
+    }
+  }
 }
 
 @media (max-width: 600px) {
@@ -64,6 +98,16 @@
 
     &__title {
       font-size: 20px;
+    }
+
+    &--compact {
+      height: 150px;
+      min-height: 150px;
+      padding: 16px 18px;
+
+      .survey-card__title {
+        font-size: 18px;
+      }
     }
   }
 }
