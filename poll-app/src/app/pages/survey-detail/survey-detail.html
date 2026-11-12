@@ -19,9 +19,9 @@
 
   <main class="survey-page__main">
     @if (loading()) {
-      <p>Loading survey...</p>
+      <p role="status">Loading survey...</p>
     } @else if (errorMessage()) {
-      <p class="survey-page__error">
+      <p class="survey-page__error" role="alert">
         {{ errorMessage() }}
       </p>
     } @else if (survey(); as currentSurvey) {
@@ -90,29 +90,27 @@
 
                 <div class="survey-page__options">
                   @for (
-                    option of options();
+                    option of getOptionsForQuestion(question.id);
                     track option.id;
                     let j = $index
                   ) {
-                    @if (option.question_id === question.id) {
-                      <label class="survey-page__option">
-                        <input
-                          [type]="question.allow_multiple_choices
-                            ? 'checkbox'
-                            : 'radio'"
-                          [name]="'question-' + question.id"
-                          [checked]="isSelected(question.id, option.id)"
-                          [disabled]="voteSubmitted() || submitting()"
-                          (change)="selectAnswer(question, option.id)" />
+                    <label class="survey-page__option">
+                      <input
+                        [type]="question.allow_multiple_choices
+                          ? 'checkbox'
+                          : 'radio'"
+                        [name]="'question-' + question.id"
+                        [checked]="isSelected(question.id, option.id)"
+                        [disabled]="voteSubmitted() || submitting()"
+                        (change)="selectAnswer(question, option.id)" />
 
-                        <span>
-                          <strong>
-                            {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
-                          </strong>
-                          {{ option.text }}
-                        </span>
-                      </label>
-                    }
+                      <span>
+                        <strong>
+                          {{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[j] }}.
+                        </strong>
+                        {{ option.text }}
+                      </span>
+                    </label>
                   }
                 </div>
               </section>
@@ -122,7 +120,9 @@
           </div>
 
           @if (voteMessage()) {
-            <p class="survey-page__vote-message" role="status">
+            <p
+              class="survey-page__vote-message"
+              role="status">
               {{ voteMessage() }}
             </p>
           }
@@ -213,7 +213,16 @@
                           </strong>
                         </div>
 
-                        <div class="survey-page__result-track">
+                        <div
+                          class="survey-page__result-track"
+                          role="progressbar"
+                          [attr.aria-label]="result.option_text"
+                          [attr.aria-valuenow]="getVotePercentage(
+                            question.id,
+                            result.vote_count
+                          )"
+                          aria-valuemin="0"
+                          aria-valuemax="100">
                           <div
                             class="survey-page__result-bar"
                             [style.width.%]="getVotePercentage(
