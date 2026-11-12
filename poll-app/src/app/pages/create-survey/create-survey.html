@@ -1,3 +1,8 @@
+<header class="create-page-header">
+  <a routerLink="/" aria-label="Poll App home">
+    <img src="/assets/img/logo_purple_dark.svg" alt="Poll App" />
+  </a>
+</header>
 
 <main class="create-page">
   <section class="create-survey">
@@ -10,7 +15,15 @@
 
       <a routerLink="/" class="create-survey__cancel">
         <span>Cancel</span>
-        <span class="create-survey__close" aria-hidden="true">×</span>
+        <span class="create-survey__close" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path
+              d="M6 6L18 18M18 6L6 18"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round" />
+          </svg>
+        </span>
       </a>
     </div>
 
@@ -128,7 +141,6 @@
                 @for (item of categories; track item) {
                   <option [value]="item">{{ item }}</option>
                 }
-
               </select>
 
               @if (submitted() && isCategoryInvalid()) {
@@ -307,7 +319,6 @@
 
                 </div>
               }
-
             </div>
 
             <div class="create-survey__answer-actions">
@@ -345,7 +356,6 @@
 
           </section>
         }
-
       </div>
 
       @if (questions().length < maxQuestions) {
@@ -404,7 +414,6 @@
             (click)="openPublishedSurvey()">
             View published survey
           </button>
-
         </div>
       }
 
@@ -425,7 +434,6 @@
               Check the highlighted fields before publishing your survey.
             </p>
           </div>
-
         </div>
       }
 
@@ -443,7 +451,6 @@
           src="/assets/img/primary_button_check.svg"
           alt=""
           aria-hidden="true" />
-
       </button>
 
     </div>
