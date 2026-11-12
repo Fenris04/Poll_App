@@ -124,11 +124,35 @@
               class="survey-page__complete"
               [disabled]="submitting() || voteSubmitted()"
               (click)="completeSurvey()">
-              {{ submitting()
-                ? 'Submitting...'
-                : voteSubmitted()
-                  ? 'Survey completed'
-                  : 'Complete survey' }}
+
+              <span class="survey-page__complete-label--desktop">
+                {{ submitting()
+                  ? 'Submitting...'
+                  : voteSubmitted()
+                    ? 'Survey completed'
+                    : 'Complete survey' }}
+              </span>
+
+              <span class="survey-page__complete-label--mobile">
+                {{ submitting()
+                  ? 'Submitting...'
+                  : voteSubmitted()
+                    ? 'Completed'
+                    : 'Complete' }}
+              </span>
+
+              <svg
+                class="survey-page__complete-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true">
+                <path
+                  d="M5 12.5L10 17.5L19 7"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
             </button>
           </div>
         </section>
