@@ -1,18 +1,14 @@
-
 .hero {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 35%);
+  grid-template-rows: auto auto auto;
+  column-gap: 32px;
   align-items: center;
-  justify-content: space-between;
-  gap: 32px;
   padding: 60px 0;
 
-  &__content {
-    flex: 1;
-    min-width: 0;
-    max-width: 900px;
-  }
-
-  h1 {
+  &__title {
+    grid-column: 1;
+    grid-row: 1;
     font-family: 'Nerko One', cursive;
     font-weight: 400;
     font-size: clamp(48px, 6.5vw, 100px);
@@ -21,7 +17,9 @@
     margin: 0;
   }
 
-  p {
+  &__description {
+    grid-column: 1;
+    grid-row: 2;
     font-family: 'Mulish', sans-serif;
     font-weight: 600;
     font-size: 24px;
@@ -32,6 +30,9 @@
   }
 
   &__button {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -73,49 +74,93 @@
   }
 
   &__image {
+    grid-column: 2;
+    grid-row: 1 / 4;
     display: block;
-    width: 35%;
+    width: 100%;
     max-width: 420px;
     height: auto;
-    flex-shrink: 0;
+    justify-self: center;
   }
 }
 
 @media (max-width: 900px) {
   .hero {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 32px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 28px;
+    padding: 48px 0;
 
-    &__content {
-      max-width: 100%;
-    }
-
-    p {
-      font-size: 18px;
-      max-width: 100%;
-
-      br {
-        display: none;
-      }
+    &__title {
+      grid-column: 1;
+      grid-row: 1;
     }
 
     &__image {
+      grid-column: 1;
+      grid-row: 2;
       width: 65%;
       max-width: 350px;
-      align-self: center;
+      justify-self: center;
+    }
+
+    &__description {
+      grid-column: 1;
+      grid-row: 3;
+      max-width: 100%;
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    &__button {
+      grid-column: 1;
+      grid-row: 4;
+      justify-self: center;
     }
   }
 }
 
 @media (max-width: 600px) {
   .hero {
-    h1 {
-      font-size: clamp(40px, 9vw, 60px);
+    gap: 24px;
+    padding: 36px 0 48px;
+
+    &__title {
+      font-size: clamp(42px, 11vw, 64px);
+      line-height: 0.92;
     }
 
     &__image {
-      width: 85%;
+      width: 100%;
+      max-width: 300px;
     }
+
+    &__description {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.45;
+    }
+
+    &__button {
+      min-height: 48px;
+      padding: 10px 16px;
+      font-size: 16px;
+    }
+  }
+}
+
+@media (hover: none) {
+  .hero__button img {
+    opacity: 1;
+    max-width: 24px;
+    margin-left: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__button,
+  .hero__button img {
+    transition: none;
   }
 }
