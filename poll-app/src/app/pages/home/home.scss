@@ -21,8 +21,49 @@
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
+  }
+
+  // Ending soon: 3 große Karten
+  &__grid--ending {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  // Active / Past: 2 Karten nebeneinander
+  &__grid--list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+  }
+
+  // Nur der untere Bereich ist scrollbar
+  &__scroll-area {
+    max-height: 360px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 14px;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-orange) transparent;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--primary-orange);
+      border-radius: 999px;
+    }
+  }
+
+  // Die Darstellung der unteren Karten wird
+  // anschließend in survey-card angepasst.
+  &__list-card {
+    display: block;
+    min-width: 0;
   }
 
   &__empty {
@@ -39,7 +80,6 @@
     margin: 56px 0 28px;
   }
 
- 
   &__tabs {
     display: flex;
     align-items: center;
@@ -132,7 +172,7 @@
 }
 
 @media (max-width: 900px) {
-  .surveys__grid {
+  .surveys__grid--ending {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -145,7 +185,8 @@
 }
 
 @media (max-width: 600px) {
-  .surveys__grid {
+  .surveys__grid--ending,
+  .surveys__grid--list {
     grid-template-columns: 1fr;
   }
 

@@ -10,7 +10,7 @@
     <h3 class="surveys__subtitle">Ending soon surveys</h3>
 
     @if (endingSoonSurveys().length > 0) {
-      <div class="surveys__grid">
+      <div class="surveys__grid surveys__grid--ending">
         @for (survey of endingSoonSurveys(); track survey.id) {
           <app-survey-card [survey]="survey"></app-survey-card>
         }
@@ -68,10 +68,15 @@
     </div>
 
     @if (displayedSurveys().length > 0) {
-      <div class="surveys__grid">
-        @for (survey of displayedSurveys(); track survey.id) {
-          <app-survey-card [survey]="survey"></app-survey-card>
-        }
+      <div class="surveys__scroll-area">
+        <div class="surveys__grid surveys__grid--list">
+          @for (survey of displayedSurveys(); track survey.id) {
+            <app-survey-card
+              class="surveys__list-card"
+              [survey]="survey">
+            </app-survey-card>
+          }
+        </div>
       </div>
     } @else {
       <p class="surveys__empty">No surveys found.</p>
