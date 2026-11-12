@@ -1,18 +1,36 @@
-
 .header {
   display: flex;
   align-items: center;
   padding: 24px 0;
 
-  &__logo img {
-    display: block;
-    width: 150px;
-    height: auto;
+  &__logo {
+    display: inline-flex;
+    align-items: center;
+
+    img {
+      display: block;
+      width: 150px;
+      height: auto;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .header {
+    padding: 24px 0;
+
+    &__logo img {
+      width: 130px;
+    }
   }
 }
 
 @media (max-width: 600px) {
-  .header__logo img {
-    width: 120px;
+  .header {
+    padding: 24px 0 12px;
+
+    &__logo img {
+      width: 110px;
+    }
   }
 }
