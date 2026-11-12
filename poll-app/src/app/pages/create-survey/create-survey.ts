@@ -1,8 +1,7 @@
 
 import { Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Supabase } from '../../services/supabase';
 
 interface SurveyQuestion {
@@ -36,14 +35,15 @@ export class CreateSurvey {
     'Other'
   ];
 
+  readonly maxQuestions = 10;
+  readonly maxSurveyNameLength = 150;
+  readonly maxDescriptionLength = 1000;
+  readonly maxQuestionLength = 250;
+  readonly maxAnswerLength = 200;
+
   isPublishing = signal(false);
   publishSuccess = signal(false);
   publishedSurveyId = signal<string | null>(null);
-
-  constructor(
-    private supabase: Supabase,
-    private router: Router
-  ) {}
 
   questions = signal<SurveyQuestion[]>([
     {
@@ -59,7 +59,14 @@ export class CreateSurvey {
 
   private nextQuestionId = 2;
 
+  constructor(
+    private supabase: Supabase,
+    private router: Router
+  ) {}
+
   addQuestion(): void {
+    if (this.questions().length >= this.maxQuestions) return;
+
     this.questions.update(questions => [
       ...questions,
       {
@@ -69,6 +76,7 @@ export class CreateSurvey {
         answers: ['', '']
       }
     ]);
+    this.refreshValidation();
   }
 
   removeQuestion(id: number): void {
@@ -145,6 +153,7 @@ export class CreateSurvey {
 
   clearDescription(): void {
     this.description = '';
+    this.refreshValidation();
   }
 
   clearEndDate(): void {
@@ -154,6 +163,19 @@ export class CreateSurvey {
 
   isEmpty(value: string): boolean {
     return !value.trim();
+  }
+
+  isTextInvalid(value: string, maxLength: number): boolean {
+    const length = value.trim().length;
+    return length === 0 || length > maxLength;
+  }
+
+  isDescriptionInvalid(): boolean {
+    return this.description.length > this.maxDescriptionLength;
+  }
+
+  isCategoryInvalid(): boolean {
+    return !this.categories.includes(this.category);
   }
 
   isEndDateInvalid(): boolean {
@@ -166,18 +188,17 @@ export class CreateSurvey {
 
   isQuestionInvalid(questionId: number): boolean {
     const question = this.questions().find(item => item.id === questionId);
-    return !question || this.isEmpty(question.title);
+    return !question ||
+      this.isTextInvalid(question.title, this.maxQuestionLength);
   }
 
   isAnswerInvalid(questionId: number, index: number): boolean {
     const question = this.questions().find(item => item.id === questionId);
-    return !question || this.isEmpty(question.answers[index] ?? '');
+    return !question ||
+      this.isTextInvalid(question.answers[index] ?? '', this.maxAnswerLength);
   }
 
-  isFormValid(): boolean {
-    if (this.isEmpty(this.surveyName) || !this.category) return false;
-    if (this.isEndDateInvalid()) return false;
-
+  areQuestionsValid(): boolean {
     return this.questions().every(question =>
       !this.isQuestionInvalid(question.id) &&
       question.answers.length >= 2 &&
@@ -188,11 +209,19 @@ export class CreateSurvey {
     );
   }
 
+  isFormValid(): boolean {
+    if (this.isTextInvalid(this.surveyName, this.maxSurveyNameLength)) return false;
+    if (this.isDescriptionInvalid() || this.isCategoryInvalid()) return false;
+    if (this.isEndDateInvalid()) return false;
+    if (this.questions().length < 1 || this.questions().length > 10) return false;
+    return this.areQuestionsValid();
+  }
+
   refreshValidation(): void {
     if (!this.submitted()) return;
 
     this.errorMessage.set(
-      this.isFormValid() ? '' : 'Please complete all required fields.'
+      this.isFormValid() ? '' : 'Please check the highlighted fields.'
     );
   }
 
@@ -204,18 +233,17 @@ export class CreateSurvey {
   }
 
   async publishSurvey(): Promise<void> {
+    if (this.isPublishing() || this.publishSuccess()) return;
     this.submitted.set(true);
 
     if (!this.isFormValid()) {
-      this.errorMessage.set('Please complete all required fields.');
+      this.errorMessage.set('Please check the highlighted fields.');
       this.focusFirstInvalidField();
       return;
     }
 
-    if (this.isPublishing()) return;
-      this.errorMessage.set('');
-      this.isPublishing.set(true);
-
+    this.errorMessage.set('');
+    this.isPublishing.set(true);
     await this.saveSurvey();
   }
 

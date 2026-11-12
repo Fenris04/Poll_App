@@ -33,11 +33,12 @@
                 id="survey-name"
                 name="surveyName"
                 type="text"
+                maxlength="150"
                 [(ngModel)]="surveyName"
                 (ngModelChange)="refreshValidation()"
-                [class.create-survey__invalid]="submitted() && isEmpty(surveyName)"
-                [attr.aria-invalid]="submitted() && isEmpty(surveyName)"
-                [attr.aria-describedby]="submitted() && isEmpty(surveyName) ? 'survey-name-error' : null"
+                [class.create-survey__invalid]="submitted() && isTextInvalid(surveyName, maxSurveyNameLength)"
+                [attr.aria-invalid]="submitted() && isTextInvalid(surveyName, maxSurveyNameLength)"
+                [attr.aria-describedby]="submitted() && isTextInvalid(surveyName, maxSurveyNameLength) ? 'survey-name-error' : null"
                 required />
 
               <button
@@ -56,11 +57,11 @@
               </button>
             </div>
 
-            @if (submitted() && isEmpty(surveyName)) {
+            @if (submitted() && isTextInvalid(surveyName, maxSurveyNameLength)) {
               <p
                 id="survey-name-error"
                 class="create-survey__field-error">
-                Please enter a survey name.
+                Please enter a survey name (max. 150 characters).
               </p>
             }
           </div>
@@ -117,9 +118,9 @@
                 name="category"
                 [(ngModel)]="category"
                 (ngModelChange)="refreshValidation()"
-                [class.create-survey__invalid]="submitted() && !category"
-                [attr.aria-invalid]="submitted() && !category"
-                [attr.aria-describedby]="submitted() && !category ? 'category-error' : null"
+                [class.create-survey__invalid]="submitted() && isCategoryInvalid()"
+                [attr.aria-invalid]="submitted() && isCategoryInvalid()"
+                [attr.aria-describedby]="submitted() && isCategoryInvalid() ? 'category-error' : null"
                 required>
 
                 <option value="">Select</option>
@@ -130,7 +131,7 @@
 
               </select>
 
-              @if (submitted() && !category) {
+              @if (submitted() && isCategoryInvalid()) {
                 <p
                   id="category-error"
                   class="create-survey__field-error">
@@ -153,7 +154,12 @@
               id="description"
               name="description"
               rows="4"
-              [(ngModel)]="description"></textarea>
+              maxlength="1000"
+              [(ngModel)]="description"
+              (ngModelChange)="refreshValidation()"
+              [class.create-survey__invalid]="submitted() && isDescriptionInvalid()"
+              [attr.aria-invalid]="submitted() && isDescriptionInvalid()"
+              [attr.aria-describedby]="submitted() && isDescriptionInvalid() ? 'description-error' : null"></textarea>
 
             <button
               type="button"
@@ -170,6 +176,14 @@
                 alt="" />
             </button>
           </div>
+
+          @if (submitted() && isDescriptionInvalid()) {
+            <p
+              id="description-error"
+              class="create-survey__field-error">
+              Description must not exceed 1000 characters.
+            </p>
+          }
         </div>
 
       </div>
@@ -209,6 +223,7 @@
               [id]="'question-' + question.id"
               type="text"
               [name]="'question-' + question.id"
+              maxlength="250"
               [ngModel]="question.title"
               (ngModelChange)="updateQuestionTitle(question.id, $event)"
               [class.create-survey__invalid]="submitted() && isQuestionInvalid(question.id)"
@@ -221,7 +236,7 @@
               <p
                 [id]="'question-error-' + question.id"
                 class="create-survey__field-error">
-                Please enter a question.
+                Please enter a question (max. 250 characters).
               </p>
             }
 
@@ -255,6 +270,7 @@
                   <div class="create-survey__answer-field">
                     <input
                       type="text"
+                      maxlength="200"
                       [name]="'answer-' + question.id + '-' + j"
                       [ngModel]="answer"
                       (ngModelChange)="updateAnswer(question.id, j, $event)"
@@ -268,7 +284,7 @@
                       <p
                         [id]="'answer-error-' + question.id + '-' + j"
                         class="create-survey__field-error">
-                        Please enter an answer.
+                        Please enter an answer (max. 200 characters).
                       </p>
                     }
                   </div>
@@ -332,28 +348,34 @@
 
       </div>
 
-      <button
-        type="button"
-        class="create-survey__add-question"
-        (click)="addQuestion()">
-        <span>Add next question</span>
+      @if (questions().length < maxQuestions) {
+        <button
+          type="button"
+          class="create-survey__add-question"
+          (click)="addQuestion()">
+          <span>Add next question</span>
 
-        <span class="create-survey__plus-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <circle
-              cx="12"
-              cy="12"
-              r="9"
-              stroke="currentColor"
-              stroke-width="2" />
-            <path
-              d="M12 7V17M7 12H17"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round" />
-          </svg>
-        </span>
-      </button>
+          <span class="create-survey__plus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                stroke-width="2" />
+              <path
+                d="M12 7V17M7 12H17"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round" />
+            </svg>
+          </span>
+        </button>
+      } @else {
+        <p class="create-survey__answer-limit" role="status">
+          You can add up to 10 questions.
+        </p>
+      }
 
     </form>
 
