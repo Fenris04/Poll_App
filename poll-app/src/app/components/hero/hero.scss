@@ -94,11 +94,6 @@
     gap: 28px;
     padding: 48px 0;
 
-    &__title {
-      grid-column: 1;
-      grid-row: 1;
-    }
-
     &__image {
       grid-column: 1;
       grid-row: 2;
@@ -108,16 +103,13 @@
     }
 
     &__description {
-      grid-column: 1;
       grid-row: 3;
       max-width: 100%;
       margin: 0;
       font-size: 18px;
-      line-height: 1.5;
     }
 
     &__button {
-      grid-column: 1;
       grid-row: 4;
       justify-self: center;
     }
@@ -153,8 +145,6 @@
       background-color: var(--primary-orange);
 
       img {
-        width: 24px;
-        height: 24px;
         max-width: 24px;
         opacity: 1;
       }
