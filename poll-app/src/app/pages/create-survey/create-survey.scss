@@ -19,20 +19,9 @@
   z-index: -1;
 }
 
+// Logo nur auf Mobile anzeigen
 .create-page-header {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  padding: 32px 0 0;
-
-  img {
-    display: block;
-    width: 150px;
-    max-width: 100%;
-    height: auto;
-  }
+  display: none;
 }
 
 .create-page {
@@ -629,24 +618,37 @@
     overflow-x: clip;
   }
 
+  // Logo sichtbar, mit Abstand zum oberen Rand
   .create-page-header {
-    padding: 32px 0 0 8px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 32px 8px 24px;
 
     img {
+      display: block;
       width: 120px;
       max-width: 100%;
       height: auto;
     }
   }
 
+  // Globales app-root-Padding links/rechts ausgleichen
   .create-page {
-    padding: 28px 0 48px;
+    width: calc(100% + 32px);
+    max-width: none;
+    min-width: 0;
+    margin-left: -16px;
+    padding: 0 0 48px;
+    box-sizing: border-box;
   }
 
   .create-survey {
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    margin: 0;
     padding: 28px 16px 32px;
     border-radius: 0 72px 0 0;
 
