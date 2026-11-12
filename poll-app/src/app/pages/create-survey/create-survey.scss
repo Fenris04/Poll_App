@@ -604,7 +604,7 @@
   }
 }
 
-// Tablet und Mobile: Figma-Layout bis 900px
+// Tablet und Mobile bis einschließlich 900px
 @media (max-width: 900px) {
   .create-page-header {
     display: flex;
@@ -621,7 +621,7 @@
     }
   }
 
-  // Container an der tatsächlichen Viewportbreite ausrichten
+  // Violetter Container über die gesamte Viewportbreite
   .create-page {
     width: 100vw;
     max-width: none;
@@ -644,7 +644,7 @@
       align-items: flex-start;
       gap: 12px;
       margin-bottom: 26px;
-      padding: 0 4px;
+      padding: 8px 12px 0 4px;
     }
 
     &__heading {
@@ -665,18 +665,22 @@
       overflow-wrap: normal;
     }
 
+    // Korrigierter X-Button
     &__cancel {
-      flex: 0 0 36px;
-      width: 36px;
-      height: 36px;
-      padding: 0;
+      display: inline-flex;
+      align-items: center;
       justify-content: center;
-      border-radius: 7px;
-      background-color: #785951;
-      color: #ffffff;
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      margin-top: 8px;
+      padding: 0;
+      border-radius: 8px;
+      background-color: var(--primary-orange);
+      color: var(--primary-purple);
 
       &:hover {
-        background-color: #a47762;
+        background-color: var(--secondary-orange);
       }
     }
 
@@ -685,8 +689,8 @@
     }
 
     &__close {
-      width: 19px;
-      height: 19px;
+      width: 22px;
+      height: 22px;
     }
 
     &__form {
@@ -707,7 +711,7 @@
       margin-bottom: 32px;
     }
 
-    // Figma-Feldreihenfolge
+    // Feldreihenfolge entsprechend Figma
     &__details,
     &__details-bottom {
       display: contents;
