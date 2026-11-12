@@ -87,16 +87,17 @@
   }
 
   &__form {
+    min-width: 0;
     padding: 40px;
     background-color: #f3eef5;
     border-radius: 0 140px 0 0;
   }
 
-  &__meta {
+  &__form-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
   }
 
   &__status {
@@ -105,6 +106,21 @@
     background-color: var(--primary-orange);
     font-size: 16px;
     font-weight: 700;
+  }
+
+  &__close {
+    display: none;
+    color: var(--primary-purple);
+    font-size: 32px;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
   }
 
   &__category {
@@ -124,12 +140,14 @@
     font-weight: 400;
     line-height: 1;
     color: #f68b2e;
+    overflow-wrap: anywhere;
   }
 
   &__description {
     margin: 16px 0 40px;
     font-size: 18px;
     line-height: 1.5;
+    overflow-wrap: anywhere;
   }
 
   &__questions {
@@ -147,6 +165,7 @@
       font-size: 20px;
       line-height: 1.3;
       font-weight: 700;
+      overflow-wrap: anywhere;
     }
   }
 
@@ -170,6 +189,7 @@
     font-weight: 400;
     line-height: 1.4;
     cursor: pointer;
+    overflow-wrap: anywhere;
 
     input {
       width: 20px;
@@ -236,6 +256,7 @@
   }
 
   &__results {
+    min-width: 0;
     padding: 140px 0 0;
 
     h2 {
@@ -278,6 +299,7 @@
       font-size: 20px;
       font-weight: 700;
       line-height: 1.4;
+      overflow-wrap: anywhere;
     }
   }
 
@@ -292,8 +314,10 @@
     gap: 16px;
     margin-bottom: 8px;
     font-size: 16px;
+    overflow-wrap: anywhere;
 
     strong {
+      flex-shrink: 0;
       font-weight: 700;
     }
   }
@@ -322,7 +346,8 @@
 @media (max-width: 900px) {
   .survey-page {
     &__layout {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
     }
 
     &__results {
@@ -339,6 +364,7 @@
   .survey-page {
     &__header {
       gap: 16px;
+      padding: 24px 0 32px;
     }
 
     &__logo {
@@ -346,30 +372,121 @@
     }
 
     &__create {
-      min-height: 48px;
-      padding: 10px 14px;
-      font-size: 16px;
+      display: none;
+    }
+
+    &__main {
+      padding-bottom: 48px;
+    }
+
+    &__layout {
+      gap: 48px;
     }
 
     &__form {
-      padding: 28px 20px;
+      padding: 28px 20px 32px;
       border-radius: 0 80px 0 0;
     }
 
-    &__questions {
-      grid-template-columns: 1fr;
-      gap: 32px;
+    &__form-top {
+      padding-right: 8px;
+    }
+
+    &__close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+
+      &:focus-visible {
+        outline: 2px solid var(--primary-purple);
+        outline-offset: 3px;
+      }
+    }
+
+    h1 {
+      font-size: clamp(36px, 10vw, 48px);
+      margin: 20px 0;
     }
 
     &__meta {
       align-items: flex-start;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
+    }
+
+    &__description {
+      margin: 20px 0 32px;
+      font-size: 16px;
+    }
+
+    &__questions {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 36px;
+      margin-top: 36px;
+    }
+
+    &__question h2 {
+      font-size: 18px;
+    }
+
+    &__hint {
+      margin-bottom: 20px;
+    }
+
+    &__options {
+      gap: 18px;
+    }
+
+    &__actions {
+      margin-top: 40px;
+    }
+
+    &__complete {
+      padding: 12px 16px;
+      font-size: 16px;
+      background-color: var(--primary-orange);
+    }
+
+    &__results {
+      padding: 0;
+    }
+
+    &__results h2 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    &__results p {
+      font-size: 16px;
     }
 
     &__result-questions {
       margin-top: 32px;
       gap: 32px;
+    }
+
+    &__result-question h3 {
+      font-size: 18px;
+    }
+
+    &__result-track {
+      height: 14px;
+    }
+  }
+}
+
+@media (max-width: 375px) {
+  .survey-page {
+    &__form {
+      padding: 24px 16px 28px;
+      border-radius: 0 64px 0 0;
+    }
+
+    h1 {
+      font-size: 36px;
     }
   }
 }

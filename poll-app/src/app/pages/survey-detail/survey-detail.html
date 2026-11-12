@@ -27,13 +27,23 @@
     } @else if (survey(); as currentSurvey) {
       <div class="survey-page__layout">
 
-        <!-- LEFT: SURVEY FORM -->
         <section class="survey-page__form">
-          <div class="survey-page__meta">
+          <div class="survey-page__form-top">
             <span class="survey-page__status">
               Published
             </span>
 
+            <a
+              class="survey-page__close"
+              routerLink="/"
+              aria-label="Close survey">
+              &times;
+            </a>
+          </div>
+
+          <h1>{{ currentSurvey.title }}</h1>
+
+          <div class="survey-page__meta">
             <span class="survey-page__category">
               Category: {{ currentSurvey.category || 'General' }}
             </span>
@@ -45,8 +55,6 @@
               {{ currentSurvey.end_date | date:'dd.MM.yyyy' }}
             </p>
           }
-
-          <h1>{{ currentSurvey.title }}</h1>
 
           @if (currentSurvey.description) {
             <p class="survey-page__description">
@@ -125,7 +133,6 @@
           </div>
         </section>
 
-        <!-- RIGHT: SURVEY RESULTS -->
         <aside class="survey-page__results">
           <h2>
             Survey results
