@@ -12,28 +12,11 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 
 import {
   Supabase,
+  Survey,
+  SurveyQuestion,
+  SurveyOption,
   SurveyResult
 } from '../../services/supabase';
-
-interface SurveyDetailData {
-  id: string;
-  title: string;
-  category: string | null;
-  description: string | null;
-  end_date: string | null;
-}
-
-interface SurveyQuestion {
-  id: string;
-  title: string;
-  allow_multiple_choices: boolean;
-}
-
-interface SurveyOption {
-  id: string;
-  question_id: string;
-  text: string;
-}
 
 @Component({
   selector: 'app-survey-detail',
@@ -43,7 +26,7 @@ interface SurveyOption {
   styleUrl: './survey-detail.scss'
 })
 export class SurveyDetail implements OnInit, OnDestroy {
-  survey = signal<SurveyDetailData | null>(null);
+  survey = signal<Survey | null>(null);
   options = signal<SurveyOption[]>([]);
   questions = signal<SurveyQuestion[]>([]);
   results = signal<SurveyResult[]>([]);
