@@ -29,8 +29,10 @@
 
         <section class="survey-page__form">
           <div class="survey-page__form-top">
-            <span class="survey-page__status">
-              Published
+            <span
+              class="survey-page__status"
+              [class.survey-page__status--ended]="isExpired()">
+              {{ isExpired() ? 'Ended' : 'Published' }}
             </span>
 
             <a
@@ -60,7 +62,7 @@
 
           @if (currentSurvey.end_date) {
             <p class="survey-page__end-date">
-              Ends on
+              {{ isExpired() ? 'Ended on' : 'Ends on' }}
               {{ currentSurvey.end_date | date:'dd.MM.yyyy' }}
             </p>
           }
@@ -68,6 +70,12 @@
           @if (currentSurvey.description) {
             <p class="survey-page__description">
               {{ currentSurvey.description }}
+            </p>
+          }
+
+          @if (isExpired()) {
+            <p class="survey-page__expired-message" role="status">
+              This survey has ended. Voting is no longer possible.
             </p>
           }
 
@@ -94,14 +102,16 @@
                     track option.id;
                     let j = $index
                   ) {
-                    <label class="survey-page__option">
+                    <label
+                      class="survey-page__option"
+                      [class.survey-page__option--disabled]="isExpired()">
                       <input
                         [type]="question.allow_multiple_choices
                           ? 'checkbox'
                           : 'radio'"
                         [name]="'question-' + question.id"
                         [checked]="isSelected(question.id, option.id)"
-                        [disabled]="voteSubmitted() || submitting()"
+                        [disabled]="isExpired() || voteSubmitted() || submitting()"
                         (change)="selectAnswer(question, option.id)" />
 
                       <span>
@@ -131,23 +141,27 @@
             <button
               type="button"
               class="survey-page__complete"
-              [disabled]="submitting() || voteSubmitted()"
+              [disabled]="isExpired() || submitting() || voteSubmitted()"
               (click)="completeSurvey()">
 
               <span class="survey-page__complete-label--desktop">
-                {{ submitting()
-                  ? 'Submitting...'
-                  : voteSubmitted()
-                    ? 'Survey completed'
-                    : 'Complete survey' }}
+                {{ isExpired()
+                  ? 'Survey ended'
+                  : submitting()
+                    ? 'Submitting...'
+                    : voteSubmitted()
+                      ? 'Survey completed'
+                      : 'Complete survey' }}
               </span>
 
               <span class="survey-page__complete-label--mobile">
-                {{ submitting()
-                  ? 'Submitting...'
-                  : voteSubmitted()
-                    ? 'Completed'
-                    : 'Complete' }}
+                {{ isExpired()
+                  ? 'Ended'
+                  : submitting()
+                    ? 'Submitting...'
+                    : voteSubmitted()
+                      ? 'Completed'
+                      : 'Complete' }}
               </span>
 
               <svg

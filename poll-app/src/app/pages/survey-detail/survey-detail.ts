@@ -3,7 +3,8 @@ import {
   Component,
   OnInit,
   OnDestroy,
-  signal
+  signal,
+  computed
 } from '@angular/core';
 
 import { DatePipe } from '@angular/common';
@@ -37,11 +38,20 @@ export class SurveyDetail implements OnInit, OnDestroy {
 
   errorMessage = signal('');
   voteMessage = signal('');
-
   selectedAnswers = signal<Record<string, string[]>>({});
 
+  private currentTime = signal(Date.now());
+  private expirationTimer?: ReturnType<typeof setInterval>;
   private resultsChannel?: RealtimeChannel;
   private destroyed = false;
+
+  isExpired = computed(() => {
+    const endDate = this.survey()?.end_date;
+    if (!endDate) return false;
+
+    const expiration = this.getExpirationTime(endDate);
+    return expiration !== null && this.currentTime() > expiration;
+  });
 
   /**
    * Creates the survey detail component.
@@ -59,6 +69,7 @@ export class SurveyDetail implements OnInit, OnDestroy {
    */
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    this.startExpirationTimer();
 
     if (!id) {
       this.errorMessage.set('Survey ID is missing.');
@@ -67,6 +78,43 @@ export class SurveyDetail implements OnInit, OnDestroy {
     }
 
     void this.loadSurvey(id);
+  }
+
+  /**
+   * Updates the current time to detect expired surveys.
+   * @returns Nothing.
+   */
+  private startExpirationTimer(): void {
+    this.expirationTimer = setInterval(() => {
+      this.currentTime.set(Date.now());
+    }, 1000);
+  }
+
+  /**
+   * Converts the survey end date into an expiration timestamp.
+   * Date-only values expire at the end of that local day.
+   * @param endDate Survey end date.
+   * @returns Expiration timestamp or null for invalid dates.
+   */
+  private getExpirationTime(endDate: string): number | null {
+    const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(endDate);
+    const date = dateOnly
+      ? new Date(`${endDate}T23:59:59.999`)
+      : new Date(endDate);
+
+    return Number.isNaN(date.getTime()) ? null : date.getTime();
+  }
+
+  /**
+   * Checks expiration using the current clock time.
+   * @returns True when the survey has expired.
+   */
+  private hasSurveyExpiredNow(): boolean {
+    const endDate = this.survey()?.end_date;
+    if (!endDate) return false;
+
+    const expiration = this.getExpirationTime(endDate);
+    return expiration !== null && Date.now() > expiration;
   }
 
   /**
@@ -142,6 +190,7 @@ export class SurveyDetail implements OnInit, OnDestroy {
    */
   selectAnswer(question: SurveyQuestion, optionId: string): void {
     if (this.voteSubmitted() || this.submitting()) return;
+    if (this.hasSurveyExpiredNow()) return;
 
     const selected = this.selectedAnswers()[question.id] ?? [];
     const answers = question.allow_multiple_choices
@@ -197,6 +246,11 @@ export class SurveyDetail implements OnInit, OnDestroy {
     const surveyId = this.survey()?.id;
     if (!surveyId || this.submitting() || this.voteSubmitted()) return;
 
+    if (this.hasSurveyExpiredNow()) {
+      this.voteMessage.set('This survey has ended. Voting is no longer possible.');
+      return;
+    }
+
     if (!this.hasAnsweredEveryQuestion()) {
       this.voteMessage.set('Please answer every question.');
       return;
@@ -214,10 +268,16 @@ export class SurveyDetail implements OnInit, OnDestroy {
    */
   private async submitAnswers(surveyId: string): Promise<void> {
     try {
+      if (this.hasSurveyExpiredNow()) {
+        this.voteMessage.set('This survey has ended.');
+        return;
+      }
+
       await this.supabaseService.submitVote(
         surveyId,
         this.getSelectedOptionIds()
       );
+
       if (this.destroyed) return;
       this.voteSubmitted.set(true);
       this.voteMessage.set('Thank you! Your answers have been submitted.');
@@ -318,11 +378,15 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Cleans up the realtime subscription when leaving the page.
+   * Cleans up subscriptions and timers when leaving the page.
    * @returns Nothing.
    */
   ngOnDestroy(): void {
     this.destroyed = true;
+
+    if (this.expirationTimer) {
+      clearInterval(this.expirationTimer);
+    }
 
     if (this.resultsChannel) {
       void this.supabaseService.client.removeChannel(
