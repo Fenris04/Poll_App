@@ -1,3 +1,4 @@
+
 <section class="hero">
 
   <h1 class="hero__title">
@@ -5,11 +6,41 @@
     Unlock Ideas
   </h1>
 
-  <img
+  <div
     class="hero__image"
-    src="assets/img/pollscreen_variant_one.png"
-    alt="Illustration of a survey with feedback symbols"
-  />
+    role="img"
+    aria-label="Illustration of a survey with feedback symbols"
+  >
+    <img
+      class="hero__base"
+      src="assets/img/pollscreen.png"
+      alt=""
+    />
+
+    <img
+      class="hero__element hero__element--question"
+      src="assets/img/questin_mark.svg"
+      alt=""
+    />
+
+    <img
+      class="hero__element hero__element--check"
+      src="assets/img/check.svg"
+      alt=""
+    />
+
+    <img
+      class="hero__element hero__element--bubble"
+      src="assets/img/typing_bubble.svg"
+      alt=""
+    />
+
+    <img
+      class="hero__element hero__element--star"
+      src="assets/img/star.svg"
+      alt=""
+    />
+  </div>
 
   <p class="hero__description">
     Create and share surveys in minutes – from team events to
@@ -20,8 +51,8 @@
   <button
     class="hero__button"
     type="button"
-    routerLink="/create-survey">
-
+    routerLink="/create-survey"
+  >
     <span>New survey</span>
 
     <img

@@ -79,11 +79,76 @@
   &__image {
     grid-column: 2;
     grid-row: 1 / 4;
-    display: block;
+    position: relative;
     width: 100%;
-    max-width: 420px;
-    height: auto;
+    max-width: 460px;
+    aspect-ratio: 1331 / 835;
     justify-self: center;
+
+    &:hover {
+      .hero__element--question {
+        transform: translate(18%, -22%) rotate(10deg) scale(1.12);
+      }
+
+      .hero__element--check {
+        transform: translate(24%, 20%) rotate(8deg) scale(1.12);
+      }
+
+      .hero__element--bubble {
+        transform: translate(-22%, -18%) rotate(-5deg) scale(1.12);
+      }
+
+      .hero__element--star {
+        transform: translate(-20%, 24%) rotate(-15deg) scale(1.12);
+      }
+    }
+  }
+
+  &__base {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 108%;
+    height: 108%;
+    object-fit: contain;
+    transform: translate(-4%, -4%);
+    pointer-events: none;
+  }
+
+  &__element {
+    position: absolute;
+    display: block;
+    height: auto;
+    pointer-events: none;
+    transform-origin: center;
+    transition: transform 0.5s ease-in-out;
+    z-index: 3;
+
+    &--question {
+      width: 19%;
+      top: 8%;
+      left: 69%;
+    }
+
+    &--check {
+      width: 20%;
+      top: 61%;
+      left: 59%;
+      z-index: 1;
+    }
+
+    &--bubble {
+      width: 34%;
+      top: 16%;
+      left: 15%;
+      z-index: 4;
+    }
+
+    &--star {
+      width: 19%;
+      top: 70%;
+      left: 15%;
+    }
   }
 }
 
@@ -100,6 +165,22 @@
       width: 65%;
       max-width: 350px;
       justify-self: center;
+
+      .hero__element--question {
+        transform: translate(18%, -22%) rotate(10deg) scale(1.12);
+      }
+
+      .hero__element--check {
+        transform: translate(24%, 20%) rotate(8deg) scale(1.12);
+      }
+
+      .hero__element--bubble {
+        transform: translate(-22%, -18%) rotate(-5deg) scale(1.12);
+      }
+
+      .hero__element--star {
+        transform: translate(-20%, 24%) rotate(-15deg) scale(1.12);
+      }
     }
 
     &__description {
@@ -159,7 +240,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero__button,
-  .hero__button img {
+  .hero__button img,
+  .hero__element {
     transition: none;
   }
 }
