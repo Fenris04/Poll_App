@@ -77,6 +77,11 @@
             <p class="survey-page__expired-message" role="status">
               This survey has ended. Voting is no longer possible.
             </p>
+          } @else if (alreadyParticipated()) {
+            <p class="survey-page__expired-message" role="status">
+              You have already completed this survey.
+              You can still view the results.
+            </p>
           }
 
           <div class="survey-page__questions">
@@ -104,14 +109,14 @@
                   ) {
                     <label
                       class="survey-page__option"
-                      [class.survey-page__option--disabled]="isExpired()">
+                      [class.survey-page__option--disabled]="cannotVote()">
                       <input
                         [type]="question.allow_multiple_choices
                           ? 'checkbox'
                           : 'radio'"
                         [name]="'question-' + question.id"
                         [checked]="isSelected(question.id, option.id)"
-                        [disabled]="isExpired() || voteSubmitted() || submitting()"
+                        [disabled]="cannotVote()"
                         (change)="selectAnswer(question, option.id)" />
 
                       <span>
@@ -123,6 +128,14 @@
                     </label>
                   }
                 </div>
+
+                @if (showQuestionError(question.id)) {
+                  <p
+                    class="survey-page__question-error"
+                    role="status">
+                    Please select an answer.
+                  </p>
+                }
               </section>
             } @empty {
               <p>No questions available.</p>
@@ -141,26 +154,26 @@
             <button
               type="button"
               class="survey-page__complete"
-              [disabled]="isExpired() || submitting() || voteSubmitted()"
+              [disabled]="cannotVote() || !allQuestionsAnswered()"
               (click)="completeSurvey()">
 
               <span class="survey-page__complete-label--desktop">
                 {{ isExpired()
                   ? 'Survey ended'
-                  : submitting()
-                    ? 'Submitting...'
-                    : voteSubmitted()
-                      ? 'Survey completed'
+                  : alreadyParticipated() || voteSubmitted()
+                    ? 'Survey completed'
+                    : submitting()
+                      ? 'Submitting...'
                       : 'Complete survey' }}
               </span>
 
               <span class="survey-page__complete-label--mobile">
                 {{ isExpired()
                   ? 'Ended'
-                  : submitting()
-                    ? 'Submitting...'
-                    : voteSubmitted()
-                      ? 'Completed'
+                  : alreadyParticipated() || voteSubmitted()
+                    ? 'Completed'
+                    : submitting()
+                      ? 'Submitting...'
                       : 'Complete' }}
               </span>
 
@@ -187,13 +200,13 @@
           </h2>
 
           <p class="survey-page__results-info">
-            Results will be shown here after participants
-            complete the survey.
+            Results include your current selection as a preview.
+            Your vote is only saved after completing the survey.
           </p>
 
           @if (
-            results().length === 0 ||
-            getTotalVotesForSurvey() === 0
+            getTotalVotesForSurvey() === 0 &&
+            (cannotVote() || getSelectedOptionIds().length === 0)
           ) {
             <p class="survey-page__no-results">
               There are no answers yet.
@@ -211,42 +224,43 @@
                   </h3>
 
                   @for (
-                    result of results();
-                    track result.option_id
+                    option of getOptionsForQuestion(question.id);
+                    track option.id
                   ) {
-                    @if (result.question_id === question.id) {
-                      <div class="survey-page__result-option">
-                        <div class="survey-page__result-label">
-                          <span>{{ result.option_text }}</span>
+                    <div class="survey-page__result-option">
+                      <div class="survey-page__result-label">
+                        <span>{{ option.text }}</span>
 
-                          <strong>
-                            {{ getVotePercentage(
-                              question.id,
-                              result.vote_count
-                            ) }}%
-                          </strong>
-                        </div>
-
-                        <div
-                          class="survey-page__result-track"
-                          role="progressbar"
-                          [attr.aria-label]="result.option_text"
-                          [attr.aria-valuenow]="getVotePercentage(
+                        <strong>
+                          {{ getPreviewPercentage(
                             question.id,
-                            result.vote_count
-                          )"
-                          aria-valuemin="0"
-                          aria-valuemax="100">
-                          <div
-                            class="survey-page__result-bar"
-                            [style.width.%]="getVotePercentage(
-                              question.id,
-                              result.vote_count
-                            )">
-                          </div>
+                            option.id,
+                            getSavedVoteCount(option.id)
+                          ) }}%
+                        </strong>
+                      </div>
+
+                      <div
+                        class="survey-page__result-track"
+                        role="progressbar"
+                        [attr.aria-label]="option.text"
+                        [attr.aria-valuenow]="getPreviewPercentage(
+                          question.id,
+                          option.id,
+                          getSavedVoteCount(option.id)
+                        )"
+                        aria-valuemin="0"
+                        aria-valuemax="100">
+                        <div
+                          class="survey-page__result-bar"
+                          [style.width.%]="getPreviewPercentage(
+                            question.id,
+                            option.id,
+                            getSavedVoteCount(option.id)
+                          )">
                         </div>
                       </div>
-                    }
+                    </div>
                   }
                 </section>
               }

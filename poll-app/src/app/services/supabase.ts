@@ -55,6 +55,8 @@ export interface CreateSurveyData {
 })
 export class Supabase {
   private supabase: SupabaseClient;
+  private readonly participantKey = 'poll-app-participant-id';
+  private participantId?: string;
 
   /**
    * Initializes the Supabase client.
@@ -75,6 +77,40 @@ export class Supabase {
   }
 
   /**
+   * Gets or creates an anonymous browser participant ID.
+   * @returns The participant UUID.
+   */
+  getParticipantId(): string {
+    if (this.participantId) return this.participantId;
+
+    const saved = localStorage.getItem(this.participantKey);
+    const valid = saved && /^[0-9a-f-]{36}$/i.test(saved);
+
+    this.participantId = valid ? saved : crypto.randomUUID();
+    localStorage.setItem(this.participantKey, this.participantId);
+
+    return this.participantId;
+  }
+
+  /**
+   * Checks whether this browser already voted in a survey.
+   * @param surveyId ID of the survey.
+   * @returns True if a participation exists.
+   */
+  async hasParticipated(surveyId: string): Promise<boolean> {
+    const { data, error } = await this.supabase.rpc(
+      'has_participated',
+      {
+        p_survey_id: surveyId,
+        p_participant_id: this.getParticipantId()
+      }
+    );
+
+    if (error) throw error;
+    return data === true;
+  }
+
+  /**
    * Retrieves all surveys ordered by creation date.
    * @returns A promise containing the surveys.
    */
@@ -85,7 +121,6 @@ export class Supabase {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-
     return (data ?? []) as Survey[];
   }
 
@@ -102,7 +137,6 @@ export class Supabase {
       .single();
 
     if (error) throw error;
-
     return data as Survey;
   }
 
@@ -119,7 +153,6 @@ export class Supabase {
       .order('created_at', { ascending: true });
 
     if (error) throw error;
-
     return (data ?? []) as SurveyOption[];
   }
 
@@ -136,27 +169,29 @@ export class Supabase {
       .order('position', { ascending: true });
 
     if (error) throw error;
-
     return (data ?? []) as SurveyQuestion[];
   }
 
   /**
-   * Submits the selected answer options.
+   * Submits one vote for the current browser participant.
    * @param surveyId ID of the survey.
-   * @param optionIds IDs of the selected answer options.
-   * @returns A promise containing the submitted vote ID.
+   * @param optionIds IDs of selected answer options.
+   * @returns The submitted vote ID.
    */
   async submitVote(
     surveyId: string,
     optionIds: string[]
   ): Promise<string> {
-    const { data, error } = await this.supabase.rpc('submit_vote', {
-      p_survey_id: surveyId,
-      p_option_ids: optionIds
-    });
+    const { data, error } = await this.supabase.rpc(
+      'submit_vote_once',
+      {
+        p_survey_id: surveyId,
+        p_option_ids: optionIds,
+        p_participant_id: this.getParticipantId()
+      }
+    );
 
     if (error) throw error;
-
     return data as string;
   }
 
@@ -172,14 +207,13 @@ export class Supabase {
     );
 
     if (error) throw error;
-
     return (data ?? []) as SurveyResult[];
   }
 
   /**
    * Creates a survey with questions and answer options.
    * @param data Data required to create the survey.
-   * @returns A promise containing the new survey ID.
+   * @returns The new survey ID.
    */
   async createSurvey(data: CreateSurveyData): Promise<string> {
     const { data: surveyId, error } = await this.client.rpc(
@@ -196,7 +230,6 @@ export class Supabase {
     );
 
     if (error) throw error;
-
     return surveyId as string;
   }
 }

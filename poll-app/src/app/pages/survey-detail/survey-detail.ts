@@ -35,6 +35,9 @@ export class SurveyDetail implements OnInit, OnDestroy {
   loading = signal(true);
   submitting = signal(false);
   voteSubmitted = signal(false);
+  alreadyParticipated = signal(false);
+  participationLoading = signal(true);
+  validationStarted = signal(false);
 
   errorMessage = signal('');
   voteMessage = signal('');
@@ -52,6 +55,23 @@ export class SurveyDetail implements OnInit, OnDestroy {
     const expiration = this.getExpirationTime(endDate);
     return expiration !== null && this.currentTime() > expiration;
   });
+
+  allQuestionsAnswered = computed(() => {
+    const questions = this.questions();
+    const selected = this.selectedAnswers();
+
+    return questions.length > 0 && questions.every(
+      question => (selected[question.id] ?? []).length > 0
+    );
+  });
+
+  cannotVote = computed(() =>
+    this.isExpired() ||
+    this.alreadyParticipated() ||
+    this.participationLoading() ||
+    this.submitting() ||
+    this.voteSubmitted()
+  );
 
   /**
    * Creates the survey detail component.
@@ -91,10 +111,9 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Converts the survey end date into an expiration timestamp.
-   * Date-only values expire at the end of that local day.
+   * Converts an end date into an expiration timestamp.
    * @param endDate Survey end date.
-   * @returns Expiration timestamp or null for invalid dates.
+   * @returns Timestamp or null for invalid dates.
    */
   private getExpirationTime(endDate: string): number | null {
     const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(endDate);
@@ -106,7 +125,7 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Checks expiration using the current clock time.
+   * Checks expiration against the current clock.
    * @returns True when the survey has expired.
    */
   private hasSurveyExpiredNow(): boolean {
@@ -118,16 +137,19 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Loads the survey, its questions and its options.
-   * @param id ID of the requested survey.
-   * @returns A promise that resolves when loading finishes.
+   * Loads the survey and its participation state.
+   * @param id Survey ID.
+   * @returns A promise resolving after loading.
    */
   async loadSurvey(id: string): Promise<void> {
     this.loading.set(true);
     this.errorMessage.set('');
+    this.participationLoading.set(true);
 
     try {
       await this.fetchSurveyData(id);
+      if (this.destroyed) return;
+      await this.loadParticipation(id);
       if (this.destroyed) return;
       await this.loadResults(id);
       if (!this.destroyed) this.subscribeToResults(id);
@@ -137,14 +159,17 @@ export class SurveyDetail implements OnInit, OnDestroy {
         this.errorMessage.set('Survey could not be loaded.');
       }
     } finally {
-      if (!this.destroyed) this.loading.set(false);
+      if (!this.destroyed) {
+        this.participationLoading.set(false);
+        this.loading.set(false);
+      }
     }
   }
 
   /**
-   * Retrieves the survey and its related data from Supabase.
-   * @param id ID of the requested survey.
-   * @returns A promise that resolves after updating the signals.
+   * Retrieves the survey, questions and answer options.
+   * @param id Survey ID.
+   * @returns A promise resolving after retrieval.
    */
   private async fetchSurveyData(id: string): Promise<void> {
     const [survey, questions, options] = await Promise.all([
@@ -162,9 +187,22 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
+   * Checks whether the browser already participated.
+   * @param id Survey ID.
+   * @returns A promise resolving after the check.
+   */
+  private async loadParticipation(id: string): Promise<void> {
+    const participated = await this.supabaseService.hasParticipated(id);
+
+    if (!this.destroyed) {
+      this.alreadyParticipated.set(participated);
+    }
+  }
+
+  /**
    * Returns the answer options belonging to a question.
-   * @param questionId ID of the question.
-   * @returns Options associated with the question.
+   * @param questionId Question ID.
+   * @returns Options for the question.
    */
   getOptionsForQuestion(questionId: string): SurveyOption[] {
     return this.options().filter(
@@ -173,24 +211,36 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Checks whether an answer option is selected.
-   * @param questionId ID of the question.
-   * @param optionId ID of the answer option.
-   * @returns True when the option is selected.
+   * Checks whether an option is selected.
+   * @param questionId Question ID.
+   * @param optionId Option ID.
+   * @returns True if selected.
    */
   isSelected(questionId: string, optionId: string): boolean {
     return (this.selectedAnswers()[questionId] ?? []).includes(optionId);
   }
 
   /**
+   * Checks whether a question needs an error message.
+   * @param questionId Question ID.
+   * @returns True if the question is unanswered.
+   */
+  showQuestionError(questionId: string): boolean {
+    return this.validationStarted() &&
+      !this.cannotVote() &&
+      (this.selectedAnswers()[questionId] ?? []).length === 0;
+  }
+
+  /**
    * Updates the selected answers for a question.
    * @param question Question being answered.
-   * @param optionId ID of the selected option.
+   * @param optionId Selected option ID.
    * @returns Nothing.
    */
   selectAnswer(question: SurveyQuestion, optionId: string): void {
-    if (this.voteSubmitted() || this.submitting()) return;
-    if (this.hasSurveyExpiredNow()) return;
+    if (this.cannotVote() || this.hasSurveyExpiredNow()) return;
+
+    this.validationStarted.set(true);
 
     const selected = this.selectedAnswers()[question.id] ?? [];
     const answers = question.allow_multiple_choices
@@ -204,7 +254,7 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Adds or removes an option from a multiple-choice selection.
+   * Toggles an answer in a multiple-choice selection.
    * @param selected Currently selected option IDs.
    * @param optionId Option ID to toggle.
    * @returns Updated selection.
@@ -220,41 +270,81 @@ export class SurveyDetail implements OnInit, OnDestroy {
 
   /**
    * Returns all selected answer option IDs.
-   * @returns Flat list of selected option IDs.
+   * @returns Selected option IDs.
    */
   getSelectedOptionIds(): string[] {
     return Object.values(this.selectedAnswers()).flat();
   }
 
   /**
-   * Checks whether every question has at least one answer.
-   * @returns True when all questions have been answered.
+   * Checks whether a preview should be displayed.
+   * @returns True when unsent selections can be previewed.
    */
-  private hasAnsweredEveryQuestion(): boolean {
-    const questions = this.questions();
+  private canPreviewVote(): boolean {
+    return !this.cannotVote() && !this.hasSurveyExpiredNow();
+  }
 
-    return questions.length > 0 && questions.every(question =>
-      (this.selectedAnswers()[question.id] ?? []).length > 0
+  /**
+   * Returns the saved vote count for an answer option.
+   * @param optionId Answer option ID.
+   * @returns Number of saved votes.
+   */
+  getSavedVoteCount(optionId: string): number {
+    return Number(
+      this.results().find(result => result.option_id === optionId)
+        ?.vote_count ?? 0
+    );
+  }
+
+  /**
+   * Returns saved votes including the current selection.
+   * @param optionId Answer option ID.
+   * @param voteCount Number of saved votes.
+   * @returns Vote count including the unsent selection.
+   */
+  getPreviewVoteCount(optionId: string, voteCount: number): number {
+    const selected = this.getSelectedOptionIds();
+    const previewVote = this.canPreviewVote() && selected.includes(optionId)
+      ? 1
+      : 0;
+
+    return Number(voteCount) + previewVote;
+  }
+
+  /**
+   * Calculates the percentage including unsent selections.
+   * @param questionId Question ID.
+   * @param optionId Answer option ID.
+   * @param voteCount Number of saved votes.
+   * @returns Rounded preview percentage.
+   */
+  getPreviewPercentage(
+    questionId: string,
+    optionId: string,
+    voteCount: number
+  ): number {
+    const selected = this.selectedAnswers()[questionId] ?? [];
+    const previewCount = this.canPreviewVote() ? selected.length : 0;
+    const total = this.getTotalVotes(questionId) + previewCount;
+
+    if (total === 0) return 0;
+
+    return Math.round(
+      (this.getPreviewVoteCount(optionId, voteCount) / total) * 100
     );
   }
 
   /**
    * Validates and submits the selected answers.
-   * @returns A promise that resolves after the submission attempt.
+   * @returns A promise resolving after submission.
    */
   async completeSurvey(): Promise<void> {
     const surveyId = this.survey()?.id;
-    if (!surveyId || this.submitting() || this.voteSubmitted()) return;
+    if (!surveyId || this.cannotVote()) return;
 
-    if (this.hasSurveyExpiredNow()) {
-      this.voteMessage.set('This survey has ended. Voting is no longer possible.');
-      return;
-    }
-
-    if (!this.hasAnsweredEveryQuestion()) {
-      this.voteMessage.set('Please answer every question.');
-      return;
-    }
+    this.validationStarted.set(true);
+    if (this.hasSurveyExpiredNow()) return;
+    if (!this.allQuestionsAnswered()) return;
 
     this.voteMessage.set('');
     this.submitting.set(true);
@@ -263,15 +353,12 @@ export class SurveyDetail implements OnInit, OnDestroy {
 
   /**
    * Sends the selected answers to Supabase.
-   * @param surveyId ID of the survey.
-   * @returns A promise that resolves after submission.
+   * @param surveyId Survey ID.
+   * @returns A promise resolving after submission.
    */
   private async submitAnswers(surveyId: string): Promise<void> {
     try {
-      if (this.hasSurveyExpiredNow()) {
-        this.voteMessage.set('This survey has ended.');
-        return;
-      }
+      if (this.hasSurveyExpiredNow()) return;
 
       await this.supabaseService.submitVote(
         surveyId,
@@ -279,8 +366,11 @@ export class SurveyDetail implements OnInit, OnDestroy {
       );
 
       if (this.destroyed) return;
+
       this.voteSubmitted.set(true);
+      this.alreadyParticipated.set(true);
       this.voteMessage.set('Thank you! Your answers have been submitted.');
+
       await this.loadResults(surveyId);
     } catch (error) {
       this.handleVoteError(error);
@@ -291,28 +381,44 @@ export class SurveyDetail implements OnInit, OnDestroy {
 
   /**
    * Displays a message when submitting a vote fails.
-   * @param error Error returned during submission.
+   * @param error Submission error.
    * @returns Nothing.
    */
   private handleVoteError(error: unknown): void {
     console.error('Failed to submit vote:', error);
+    if (this.destroyed) return;
 
-    if (!this.destroyed) {
-      this.voteMessage.set(
-        'Your answers could not be submitted. Please try again.'
-      );
+    const message = error instanceof Error ? error.message : '';
+
+    if (message.includes('Already participated')) {
+      this.alreadyParticipated.set(true);
+      this.voteMessage.set('You have already completed this survey.');
+      return;
     }
+
+    if (message.includes('Survey has expired')) {
+      this.currentTime.set(Date.now());
+      this.voteMessage.set('This survey has ended.');
+      return;
+    }
+
+    this.voteMessage.set(
+      'Your answers could not be submitted. Please try again.'
+    );
   }
 
   /**
    * Loads the latest survey results.
-   * @param surveyId ID of the survey.
-   * @returns A promise that resolves after the results request.
+   * @param surveyId Survey ID.
+   * @returns A promise resolving after loading.
    */
   async loadResults(surveyId: string): Promise<void> {
     try {
       const results = await this.supabaseService.getSurveyResults(surveyId);
-      if (!this.destroyed) this.results.set(results);
+
+      if (!this.destroyed) {
+        this.results.set(results);
+      }
     } catch (error) {
       console.error('Failed to load results:', error);
     }
@@ -320,8 +426,8 @@ export class SurveyDetail implements OnInit, OnDestroy {
 
   /**
    * Calculates the total votes for one question.
-   * @param questionId ID of the question.
-   * @returns Total number of votes for that question.
+   * @param questionId Question ID.
+   * @returns Total votes for the question.
    */
   getTotalVotes(questionId: string): number {
     return this.results()
@@ -330,8 +436,8 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Calculates the total number of selected answers.
-   * @returns Total votes across all survey questions.
+   * Calculates the total selected answers.
+   * @returns Total votes across all questions.
    */
   getTotalVotesForSurvey(): number {
     return this.results().reduce(
@@ -341,14 +447,13 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Calculates an answer option's vote percentage.
-   * @param questionId ID of the question.
-   * @param voteCount Number of votes for the option.
-   * @returns Rounded percentage between zero and one hundred.
+   * Calculates an answer option's saved vote percentage.
+   * @param questionId Question ID.
+   * @param voteCount Votes for the option.
+   * @returns Rounded percentage.
    */
   getVotePercentage(questionId: string, voteCount: number): number {
     const total = this.getTotalVotes(questionId);
-
     if (total === 0) return 0;
 
     return Math.round((Number(voteCount) / total) * 100);
@@ -356,7 +461,7 @@ export class SurveyDetail implements OnInit, OnDestroy {
 
   /**
    * Subscribes to live updates for the survey results.
-   * @param surveyId ID of the survey.
+   * @param surveyId Survey ID.
    * @returns Nothing.
    */
   subscribeToResults(surveyId: string): void {
@@ -378,7 +483,7 @@ export class SurveyDetail implements OnInit, OnDestroy {
   }
 
   /**
-   * Cleans up subscriptions and timers when leaving the page.
+   * Cleans up subscriptions and timers.
    * @returns Nothing.
    */
   ngOnDestroy(): void {
@@ -392,6 +497,7 @@ export class SurveyDetail implements OnInit, OnDestroy {
       void this.supabaseService.client.removeChannel(
         this.resultsChannel
       );
+
       this.resultsChannel = undefined;
     }
   }

@@ -66,6 +66,7 @@
 
       img {
         max-width: 24px;
+        height: 24px;
         opacity: 1;
       }
     }
@@ -264,6 +265,14 @@
     &:hover {
       color: inherit;
     }
+  }
+
+  &__question-error {
+    margin: 12px 0 0;
+    color: #b42318;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
   }
 
   &__actions {
