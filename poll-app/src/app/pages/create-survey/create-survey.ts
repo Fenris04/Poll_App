@@ -1,7 +1,13 @@
 
-import { Component, ElementRef, signal, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  signal,
+  ViewChild
+} from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Supabase } from '../../services/supabase';
 
 interface SurveyQuestion {
@@ -19,7 +25,8 @@ interface SurveyQuestion {
   styleUrl: './create-survey.scss'
 })
 export class CreateSurvey {
-  @ViewChild('surveyForm') surveyForm?: ElementRef<HTMLFormElement>;
+  @ViewChild('surveyForm')
+  surveyForm?: ElementRef<HTMLFormElement>;
 
   surveyName = '';
   description = '';
@@ -38,14 +45,15 @@ export class CreateSurvey {
   readonly maxQuestions = 10;
   readonly maxAnswers = 6;
   readonly minAnswers = 2;
-  readonly maxSurveyNameLength = 150;
-  readonly maxDescriptionLength = 1000;
-  readonly maxQuestionLength = 250;
-  readonly maxAnswerLength = 200;
+
+  readonly maxSurveyNameLength = 30;
+  readonly maxDescriptionLength = 200;
+  readonly maxQuestionLength = 50;
+  readonly maxAnswerLength = 100;
 
   isPublishing = signal(false);
   publishSuccess = signal(false);
-  publishedSurveyId = signal<string | null>(null);
+  successDismissed = signal(false);
   submitted = signal(false);
   errorMessage = signal('');
 
@@ -60,15 +68,11 @@ export class CreateSurvey {
 
   private nextQuestionId = 2;
 
-  constructor(
-    private supabase: Supabase,
-    private router: Router
-  ) {}
+  constructor(private supabase: Supabase) {}
 
   /**
    * Creates an empty survey question.
-   *
-   * @returns A new question with two empty answers.
+   * @returns A question with two empty answers.
    */
   private createEmptyQuestion(): SurveyQuestion {
     return {
@@ -80,10 +84,9 @@ export class CreateSurvey {
   }
 
   /**
-   * Updates a question using the provided transformation.
-   *
-   * @param id - ID of the question to update.
-   * @param update - Function that transforms the matching question.
+   * Updates one question without mutating the signal.
+   * @param id Question ID.
+   * @param update Transformation for the matching question.
    */
   private updateQuestion(
     id: number,
@@ -97,7 +100,35 @@ export class CreateSurvey {
   }
 
   /**
-   * Adds a new question if the maximum has not been reached.
+   * Restricts a text value to the specified length.
+   * @param value Entered text.
+   * @param maxLength Maximum number of characters.
+   * @returns Limited text.
+   */
+  private limitText(value: string, maxLength: number): string {
+    return value.slice(0, maxLength);
+  }
+
+  /**
+   * Updates the survey name and applies its limit.
+   * @param value Entered survey name.
+   */
+  updateSurveyName(value: string): void {
+    this.surveyName = this.limitText(value, this.maxSurveyNameLength);
+    this.refreshValidation();
+  }
+
+  /**
+   * Updates the description and applies its limit.
+   * @param value Entered description.
+   */
+  updateDescription(value: string): void {
+    this.description = this.limitText(value, this.maxDescriptionLength);
+    this.refreshValidation();
+  }
+
+  /**
+   * Adds a new question if fewer than ten exist.
    */
   addQuestion(): void {
     if (this.questions().length >= this.maxQuestions) return;
@@ -106,13 +137,13 @@ export class CreateSurvey {
       ...questions,
       this.createEmptyQuestion()
     ]);
+
     this.refreshValidation();
   }
 
   /**
-   * Removes a question while keeping at least one question.
-   *
-   * @param id - ID of the question to remove.
+   * Removes a question while retaining at least one.
+   * @param id Question ID.
    */
   removeQuestion(id: number): void {
     if (this.questions().length <= 1) return;
@@ -120,13 +151,13 @@ export class CreateSurvey {
     this.questions.update(questions =>
       questions.filter(question => question.id !== id)
     );
+
     this.refreshValidation();
   }
 
   /**
-   * Adds an empty answer to the selected question.
-   *
-   * @param questionId - ID of the question.
+   * Adds an answer if the maximum has not been reached.
+   * @param questionId Question ID.
    */
   addAnswer(questionId: number): void {
     this.updateQuestion(questionId, question => ({
@@ -135,14 +166,14 @@ export class CreateSurvey {
         ? [...question.answers, '']
         : question.answers
     }));
+
     this.refreshValidation();
   }
 
   /**
-   * Removes an answer while keeping at least two answers.
-   *
-   * @param questionId - ID of the question.
-   * @param answerIndex - Index of the answer to remove.
+   * Removes an answer while retaining at least two.
+   * @param questionId Question ID.
+   * @param answerIndex Answer index.
    */
   removeAnswer(questionId: number, answerIndex: number): void {
     this.updateQuestion(questionId, question => ({
@@ -151,25 +182,30 @@ export class CreateSurvey {
         ? question.answers.filter((_, index) => index !== answerIndex)
         : question.answers
     }));
+
     this.refreshValidation();
   }
 
   /**
-   * Updates the title of a question.
-   *
-   * @param id - ID of the question.
-   * @param title - New question title.
+   * Updates a question title within its character limit.
+   * @param id Question ID.
+   * @param title Entered question title.
    */
   updateQuestionTitle(id: number, title: string): void {
-    this.updateQuestion(id, question => ({ ...question, title }));
+    const limitedTitle = this.limitText(title, this.maxQuestionLength);
+
+    this.updateQuestion(id, question => ({
+      ...question,
+      title: limitedTitle
+    }));
+
     this.refreshValidation();
   }
 
   /**
-   * Enables or disables multiple answers for a question.
-   *
-   * @param id - ID of the question.
-   * @param allowMultiple - Whether multiple answers are allowed.
+   * Enables or disables multiple-choice answers.
+   * @param id Question ID.
+   * @param allowMultiple Whether multiple answers are allowed.
    */
   updateMultipleChoice(id: number, allowMultiple: boolean): void {
     this.updateQuestion(id, question => ({
@@ -179,24 +215,26 @@ export class CreateSurvey {
   }
 
   /**
-   * Updates a specific answer of a question.
-   *
-   * @param id - ID of the question.
-   * @param index - Index of the answer.
-   * @param value - New answer text.
+   * Updates an answer within its character limit.
+   * @param id Question ID.
+   * @param index Answer index.
+   * @param value Entered answer.
    */
   updateAnswer(id: number, index: number, value: string): void {
+    const limitedValue = this.limitText(value, this.maxAnswerLength);
+
     this.updateQuestion(id, question => ({
       ...question,
       answers: question.answers.map((answer, answerIndex) =>
-        answerIndex === index ? value : answer
+        answerIndex === index ? limitedValue : answer
       )
     }));
+
     this.refreshValidation();
   }
 
   /**
-   * Clears the survey name and refreshes validation.
+   * Clears the survey name.
    */
   clearSurveyName(): void {
     this.surveyName = '';
@@ -204,7 +242,7 @@ export class CreateSurvey {
   }
 
   /**
-   * Clears the survey description and refreshes validation.
+   * Clears the description.
    */
   clearDescription(): void {
     this.description = '';
@@ -212,7 +250,7 @@ export class CreateSurvey {
   }
 
   /**
-   * Clears the survey end date and refreshes validation.
+   * Clears the end date.
    */
   clearEndDate(): void {
     this.endDate = '';
@@ -220,11 +258,10 @@ export class CreateSurvey {
   }
 
   /**
-   * Checks whether a required text is empty or too long.
-   *
-   * @param value - Text to validate.
-   * @param maxLength - Maximum allowed length.
-   * @returns True if the text is invalid.
+   * Checks whether required text is empty or too long.
+   * @param value Text to validate.
+   * @param maxLength Maximum permitted length.
+   * @returns True when invalid.
    */
   isTextInvalid(value: string, maxLength: number): boolean {
     const length = value.trim().length;
@@ -232,66 +269,70 @@ export class CreateSurvey {
   }
 
   /**
-   * Checks whether the optional description exceeds its limit.
-   *
-   * @returns True if the description is too long.
+   * Checks the optional description's length.
+   * @returns True when the description is too long.
    */
   isDescriptionInvalid(): boolean {
     return this.description.length > this.maxDescriptionLength;
   }
 
   /**
-   * Checks whether the selected category is valid.
-   *
-   * @returns True if the category is not available.
+   * Checks whether the category is supported.
+   * @returns True when invalid.
    */
   isCategoryInvalid(): boolean {
     return !this.categories.includes(this.category);
   }
 
   /**
-   * Checks whether the selected end date is invalid or expired.
-   *
-   * @returns True if the date is invalid or in the past.
+   * Checks whether the end date is valid and in the future.
+   * @returns True when invalid.
    */
   isEndDateInvalid(): boolean {
     if (!this.endDate) return false;
 
     const selected = new Date(`${this.endDate}T23:59:59`);
+
     return Number.isNaN(selected.getTime()) ||
       selected.getTime() <= Date.now();
   }
 
   /**
-   * Checks whether a question has a valid title.
-   *
-   * @param questionId - ID of the question.
-   * @returns True if the question is missing or invalid.
+   * Checks a question title.
+   * @param questionId Question ID.
+   * @returns True when invalid.
    */
   isQuestionInvalid(questionId: number): boolean {
-    const question = this.questions().find(item => item.id === questionId);
+    const question = this.questions().find(
+      item => item.id === questionId
+    );
+
     return !question ||
       this.isTextInvalid(question.title, this.maxQuestionLength);
   }
 
   /**
-   * Checks whether an answer contains valid text.
-   *
-   * @param questionId - ID of the question.
-   * @param index - Index of the answer.
-   * @returns True if the answer is missing or invalid.
+   * Checks an answer.
+   * @param questionId Question ID.
+   * @param index Answer index.
+   * @returns True when invalid.
    */
   isAnswerInvalid(questionId: number, index: number): boolean {
-    const question = this.questions().find(item => item.id === questionId);
+    const question = this.questions().find(
+      item => item.id === questionId
+    );
+
     return !question ||
-      this.isTextInvalid(question.answers[index] ?? '', this.maxAnswerLength);
+      this.isTextInvalid(
+        question.answers[index] ?? '',
+        this.maxAnswerLength
+      );
   }
 
   /**
-   * Checks whether a question has a valid number of answers.
-   *
-   * @param question - Question to validate.
-   * @returns True if the answer count is valid.
+   * Checks whether the answer count is permitted.
+   * @param question Question to validate.
+   * @returns True when valid.
    */
   private hasValidAnswerCount(question: SurveyQuestion): boolean {
     return question.answers.length >= this.minAnswers &&
@@ -299,9 +340,8 @@ export class CreateSurvey {
   }
 
   /**
-   * Checks whether all questions and answers are valid.
-   *
-   * @returns True if every question is valid.
+   * Validates every question and answer.
+   * @returns True when all questions are valid.
    */
   areQuestionsValid(): boolean {
     return this.questions().every(question =>
@@ -314,46 +354,61 @@ export class CreateSurvey {
   }
 
   /**
-   * Checks whether the complete survey form is valid.
-   *
-   * @returns True if all required fields are valid.
+   * Validates the complete survey.
+   * @returns True when all fields are valid.
    */
   isFormValid(): boolean {
-    if (this.isTextInvalid(this.surveyName, this.maxSurveyNameLength)) return false;
-    if (this.isDescriptionInvalid() || this.isCategoryInvalid()) return false;
+    if (this.isTextInvalid(this.surveyName, this.maxSurveyNameLength)) {
+      return false;
+    }
+
+    if (this.isDescriptionInvalid() || this.isCategoryInvalid()) {
+      return false;
+    }
+
     if (this.isEndDateInvalid()) return false;
-    if (this.questions().length < 1 || this.questions().length > this.maxQuestions) return false;
+
+    const count = this.questions().length;
+    if (count < 1 || count > this.maxQuestions) return false;
+
     return this.areQuestionsValid();
   }
 
   /**
-   * Refreshes the error message after a submitted form changes.
+   * Refreshes validation after the first publish attempt.
    */
   refreshValidation(): void {
     if (!this.submitted()) return;
 
     this.errorMessage.set(
-      this.isFormValid() ? '' : 'Please check the highlighted fields.'
+      this.isFormValid()
+        ? ''
+        : 'Please check the highlighted fields.'
     );
   }
 
   /**
-   * Focuses the first invalid form field.
+   * Focuses the first invalid input.
    */
   focusFirstInvalidField(): void {
     const form = this.surveyForm?.nativeElement;
-    const field = form?.querySelector<HTMLElement>('[aria-invalid="true"]');
+    const field = form?.querySelector<HTMLElement>(
+      '[aria-invalid="true"]'
+    );
+
     field?.focus();
-    field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    field?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
   }
 
   /**
-   * Validates the form and starts publishing the survey.
-   *
-   * @returns A promise that resolves when publishing finishes.
+   * Validates and publishes the survey.
    */
   async publishSurvey(): Promise<void> {
     if (this.isPublishing() || this.publishSuccess()) return;
+
     this.submitted.set(true);
 
     if (!this.isFormValid()) {
@@ -364,19 +419,19 @@ export class CreateSurvey {
 
     this.errorMessage.set('');
     this.isPublishing.set(true);
+
     await this.saveSurvey();
   }
 
   /**
-   * Saves the survey to Supabase and updates the publishing state.
-   *
-   * @returns A promise that resolves after the save attempt.
+   * Saves the survey in Supabase.
    */
-  async saveSurvey(): Promise<void> {
+  private async saveSurvey(): Promise<void> {
     try {
-      const surveyId = await this.supabase.createSurvey(this.getSurveyDraft());
-      this.publishedSurveyId.set(surveyId);
+      await this.supabase.createSurvey(this.getSurveyDraft());
+
       this.publishSuccess.set(true);
+      this.successDismissed.set(false);
     } catch (error) {
       console.error('Error publishing survey:', error);
       this.errorMessage.set('Publishing failed. Please try again.');
@@ -386,24 +441,15 @@ export class CreateSurvey {
   }
 
   /**
-   * Closes the success notification.
+   * Hides the success notification without allowing another publish.
    */
   closeSuccessNotification(): void {
-    this.publishSuccess.set(false);
+    this.successDismissed.set(true);
   }
 
   /**
-   * Navigates to the newly published survey.
-   */
-  openPublishedSurvey(): void {
-    const id = this.publishedSurveyId();
-    if (id) this.router.navigate(['/survey', id]);
-  }
-
-  /**
-   * Creates a trimmed survey draft for the Supabase service.
-   *
-   * @returns The survey data ready to be published.
+   * Creates the survey payload for Supabase.
+   * @returns Survey data ready for publishing.
    */
   getSurveyDraft() {
     return {

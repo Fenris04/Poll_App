@@ -1,3 +1,4 @@
+
 .create-survey {
   &__questions {
     row-gap: 56px;
@@ -290,22 +291,6 @@
       font-size: 28px;
       line-height: 1;
       cursor: pointer;
-    }
-  }
-
-  &__view-survey {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--primary-orange);
-    color: var(--primary-purple);
-    font-family: 'Mulish', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-
-    &:hover {
-      background-color: var(--secondary-orange);
     }
   }
 }
